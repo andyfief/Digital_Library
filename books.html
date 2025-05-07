@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Management - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .actions button {
+            margin-right: 5px;
+        }
+        .nav-links {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Books Management</h1>
+        <div class="nav-links">
+            <a href="index.html">Back to Index</a> |
+            <a href="authors.html">Authors</a> |
+            <a href="genres.html">Genres</a> |
+            <a href="users.html">Users</a> |
+            <a href="rentals.html">Rentals</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>Add New Book</h2>
+        <form id="addBookForm">
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div>
+                <label for="author">Author:</label>
+                <select id="author" name="author_id" required>
+                    <option value="">Select Author</option>
+                    <option value="1">J.K. Rowling</option>
+                    <option value="2">George Orwell</option>
+                    <option value="3">Rick Riordan</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="publication_date">Publication Date:</label>
+                <input type="date" id="publication_date" name="publication_date" required>
+            </div>
+            
+            <div>
+                <label for="description">Description:</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            
+            <div>
+                <label for="cover_img_path">Cover Image Path:</label>
+                <input type="text" id="cover_img_path" name="cover_img_path">
+            </div>
+            
+            <div>
+                <label for="total_qty">Total Quantity:</label>
+                <input type="number" id="total_qty" name="total_qty" min="1" required>
+            </div>
+            
+            <div>
+                <label for="genres">Genres:</label>
+                <select id="genres" name="genres" multiple>
+                    <option value="1">Fantasy</option>
+                    <option value="2">Dystopian</option>
+                    <option value="3">Young Adult</option>
+                </select>
+                <small>Hold Ctrl (Windows) or Cmd (Mac) to select multiple genres</small>
+            </div>
+            
+            <button type="submit">Add Book</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Existing Books</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Publication Date</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>J.K. Rowling</td>
+                    <td>1997-06-26</td>
+                    <td>10</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Animal Farm</td>
+                    <td>George Orwell</td>
+                    <td>1999-06-08</td>
+                    <td>8</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>The Lightning Thief</td>
+                    <td>Rick Riordan</td>
+                    <td>2005-02-01</td>
+                    <td>3</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>© 2025 Library Management System</p>
+    </footer>
+</body>
+</html>

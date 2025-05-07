@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genres Management - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .actions button {
+            margin-right: 5px;
+        }
+        .nav-links {
+            margin-bottom: 20px;
+        }
+        .books-in-genre {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Genres Management</h1>
+        <div class="nav-links">
+            <a href="index.html">Back to Index</a> |
+            <a href="books.html">Books</a> |
+            <a href="authors.html">Authors</a> |
+            <a href="users.html">Users</a> |
+            <a href="rentals.html">Rentals</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>Add New Genre</h2>
+        <form id="addGenreForm">
+            <div>
+                <label for="title">Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <button type="submit">Add Genre</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Existing Genres</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Fantasy</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                        <button>View Books</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Dystopian</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                        <button>View Books</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Young Adult</td>
+                    <td class="actions">
+                        <button>Edit</button>
+                        <button>Delete</button>
+                        <button>View Books</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="books-in-genre">
+        <h2>Books in Fantasy Genre</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>J.K. Rowling</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>The Lightning Thief</td>
+                    <td>Rick Riordan</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>© 2025 Library Management System</p>
+    </footer>
+</body>
+</html>

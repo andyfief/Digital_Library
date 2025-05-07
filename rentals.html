@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rentals Management - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .actions button {
+            margin-right: 5px;
+        }
+        .nav-links {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rentals Management</h1>
+        <div class="nav-links">
+            <a href="index.html">Back to Index</a> |
+            <a href="books.html">Books</a> |
+            <a href="authors.html">Authors</a> |
+            <a href="genres.html">Genres</a> |
+            <a href="users.html">Users</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>Create New Rental</h2>
+        <form id="createRentalForm">
+            <div>
+                <label for="user">User:</label>
+                <select id="user" name="user_id" required>
+                    <option value="">Select User</option>
+                    <option value="1">fiefa</option>
+                    <option value="2">arorae</option>
+                    <option value="3">bookLuvr2004</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="book">Book:</label>
+                <select id="book" name="book_id" required>
+                    <option value="">Select Book</option>
+                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
+                    <option value="2">Animal Farm</option>
+                    <option value="3">The Lightning Thief</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="date">Rental Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            
+            <div>
+                <label for="expiration_date">Expiration Date:</label>
+                <input type="date" id="expiration_date" name="expiration_date" required>
+            </div>
+            
+            <button type="submit">Create Rental</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Current Rentals</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>User</th>
+                    <th>Book</th>
+                    <th>Rental Date</th>
+                    <th>Due Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>fiefa</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>2025-04-01</td>
+                    <td>2025-04-15</td>
+                    <td class="actions">
+                        <button>Return Book</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>bookLuvr2004</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>2024-02-01</td>
+                    <td>2024-02-15</td>
+                    <td class="actions">
+                        <button>Return Book</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>bookLuvr2004</td>
+                    <td>Animal Farm</td>
+                    <td>2024-02-03</td>
+                    <td>2024-02-17</td>
+                    <td class="actions">
+                        <button>Return Book</button>
+                    </td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>bookLuvr2004</td>
+                    <td>The Lightning Thief</td>
+                    <td>2024-02-29</td>
+                    <td>2024-03-14</td>
+                    <td class="actions">
+                        <button>Return Book</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>Book Availability</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Total Quantity</th>
+                    <th>Currently Rented</th>
+                    <th>Available</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>10</td>
+                    <td>2</td>
+                    <td>8</td>
+                </tr>
+                <tr>
+                    <td>Animal Farm</td>
+                    <td>8</td>
+                    <td>1</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td>The Lightning Thief</td>
+                    <td>3</td>
+                    <td>1</td>
+                    <td>2</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <footer>
+        <p>© 2025 Library Management System</p>
+    </footer>
+</body>
+</html>
