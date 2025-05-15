@@ -92,9 +92,6 @@
                 <label for="book">Book:</label>
                 <select id="book" name="book_id" required>
                     <option value="">Select Book</option>
-                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">Animal Farm</option>
-                    <option value="3">The Lightning Thief</option>
                 </select>
             </div>
             
@@ -109,6 +106,36 @@
             </div>
             
             <button type="submit">Create Rental</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Update Rental</h2>
+        <form id="updateRentalForm">
+            <div>
+                <label for="user">User:</label>
+                <select id="user" name="user_id" required>
+                    <option value="">Select Rental</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="book">New Book Title:</label>
+                <select id="book" name="book_id" required>
+                </select>
+            </div>
+            
+            <div>
+                <label for="date">New Rental Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            
+            <div>
+                <label for="expiration_date">New Expiration Date:</label>
+                <input type="date" id="expiration_date" name="expiration_date" required>
+            </div>
+            
+            <button type="submit">Update Rental</button>
         </form>
     </section>
 

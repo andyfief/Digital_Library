@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Book Genres - Library System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        header {
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            max-width: 600px;
+            margin-bottom: 30px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
+        }
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .actions button {
+            margin-right: 5px;
+        }
+        .nav-links {
+            margin-bottom: 20px;
+        }
+        .section-divider {
+            border-top: 1px solid #ddd;
+            margin: 30px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Update Book Genres</h1>
+        <div class="nav-links">
+            <a href="index.html">Back to Index</a> |
+            <a href="books.html">Books</a> |
+            <a href="authors.html">Authors</a> |
+            <a href="genres.html">Genres</a> |
+            <a href="users.html">Users</a> |
+            <a href="rentals.html">Rentals</a>
+        </div>
+    </header>
+
+    <section>
+        <h2>Assign Genres to a Book</h2>
+        <form id="assignGenresToBookForm">
+            <div>
+                <label for="book">Select Book:</label>
+                <select id="book" name="book_id" required>
+                    <option value="">Choose a book</option>
+                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
+                    <option value="2">Animal Farm</option>
+                    <option value="3">The Lightning Thief</option>
+                </select>
+            </div>
+            
+            <div>
+                <label>Select Genres:</label>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre1" name="genres[]" value="1">
+                        <label for="genre1">Fantasy</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre2" name="genres[]" value="2">
+                        <label for="genre2">Dystopian</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre3" name="genres[]" value="3">
+                        <label for="genre3">Young Adult</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre4" name="genres[]" value="4">
+                        <label for="genre4">Science Fiction</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre5" name="genres[]" value="5">
+                        <label for="genre5">Mystery</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="genre6" name="genres[]" value="6">
+                        <label for="genre6">Historical Fiction</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit">Update Book Genres</button>
+        </form>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section>
+        <h2>Assign Books to a Genre</h2>
+        <form id="assignBooksToGenreForm">
+            <div>
+                <label for="genre">Select Genre:</label>
+                <select id="genre" name="genre_id" required>
+                    <option value="">Choose a genre</option>
+                    <option value="1">Fantasy</option>
+                    <option value="2">Dystopian</option>
+                    <option value="3">Young Adult</option>
+                    <option value="4">Science Fiction</option>
+                    <option value="5">Mystery</option>
+                    <option value="6">Historical Fiction</option>
+                </select>
+            </div>
+            
+            <div>
+                <label>Select Books:</label>
+                <div class="checkbox-grid">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="book1" name="books[]" value="1">
+                        <label for="book1">Harry Potter and the Sorcerer's Stone</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="book2" name="books[]" value="2">
+                        <label for="book2">Animal Farm</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="book3" name="books[]" value="3">
+                        <label for="book3">The Lightning Thief</label>
+                    </div>
+                </div>
+            </div>
+            
+            <button type="submit">Update Genre Books</button>
+        </form>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section>
+        <h2>Current Book-Genre Relationships</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Book ID</th>
+                    <th>Book Title</th>
+                    <th>Genre ID</th>
+                    <th>Genre Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>1</td>
+                    <td>Fantasy</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>1</td>
+                    <td>Harry Potter and the Sorcerer's Stone</td>
+                    <td>3</td>
+                    <td>Young Adult</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Animal Farm</td>
+                    <td>2</td>
+                    <td>Dystopian</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>The Lightning Thief</td>
+                    <td>1</td>
+                    <td>Fantasy</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>The Lightning Thief</td>
+                    <td>3</td>
+                    <td>Young Adult</td>
+                    <td><button class="remove-btn">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <script>
+        // Load current genres for selected book
+        document.getElementById('book').addEventListener('change', function() {
+            const bookId = this.value;
+            if (!bookId) return;
+            
+            // This would be an AJAX call to get current genres for the book
+            // For demo, we'll simulate with hardcoded data
+            const bookGenres = {
+                '1': [1, 3], // Harry Potter: Fantasy, Young Adult
+                '2': [2],    // Animal Farm: Dystopian
+                '3': [1, 3]  // Lightning Thief: Fantasy, Young Adult
+            };
+            
+            // Reset all checkboxes
+            document.querySelectorAll('#assignGenresToBookForm input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Check the ones that apply to this book
+            if (bookGenres[bookId]) {
+                bookGenres[bookId].forEach(genreId => {
+                    const checkbox = document.getElementById('genre' + genreId);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        });
+        
+        // Load current books for selected genre
+        document.getElementById('genre').addEventListener('change', function() {
+            const genreId = this.value;
+            if (!genreId) return;
+            
+            // This would be an AJAX call to get current books for the genre
+            // For demo, we'll simulate with hardcoded data
+            const genreBooks = {
+                '1': [1, 3], // Fantasy: Harry Potter, Lightning Thief
+                '2': [2],    // Dystopian: Animal Farm
+                '3': [1, 3]  // Young Adult: Harry Potter, Lightning Thief
+            };
+            
+            // Reset all checkboxes
+            document.querySelectorAll('#assignBooksToGenreForm input[type="checkbox"]').forEach(cb => {
+                cb.checked = false;
+            });
+            
+            // Check the ones that apply to this genre
+            if (genreBooks[genreId]) {
+                genreBooks[genreId].forEach(bookId => {
+                    const checkbox = document.getElementById('book' + bookId);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        });
+        
+        // Form submissions would send data to backend
+        document.getElementById('assignGenresToBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const bookId = document.getElementById('book').value;
+            const selectedGenres = Array.from(
+                document.querySelectorAll('#assignGenresToBookForm input[type="checkbox"]:checked')
+            ).map(cb => cb.value);
+            
+            alert(`Updating book ID ${bookId} with genres: ${selectedGenres.join(', ')}`);
+            // Here you would make an AJAX request to update the database
+        });
+        
+        document.getElementById('assignBooksToGenreForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const genreId = document.getElementById('genre').value;
+            const selectedBooks = Array.from(
+                document.querySelectorAll('#assignBooksToGenreForm input[type="checkbox"]:checked')
+            ).map(cb => cb.value);
+            
+            alert(`Updating genre ID ${genreId} with books: ${selectedBooks.join(', ')}`);
+            // Here you would make an AJAX request to update the database
+        });
+        
+        // Remove relationships
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const bookId = row.cells[0].textContent;
+                const bookTitle = row.cells[1].textContent;
+                const genreId = row.cells[2].textContent;
+                const genreTitle = row.cells[3].textContent;
+                
+                if (confirm(`Remove the relationship between "${bookTitle}" and "${genreTitle}"?`)) {
+                    // Here you would make an AJAX request to delete the relationship
+                    row.remove();
+                }
+            });
+        });
+    </script>
+
+    <footer>
+        <p>© 2025 Library Management System</p>
+    </footer>
+</body>
+</html>
