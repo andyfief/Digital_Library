@@ -47,6 +47,17 @@ app.get('/api/rentals', async (req, res) => {
     }
 });
 
+async function resetDatabase() {
+    try {
+        await db.query('CALL reset_database();');
+        console.log('Database reset successfully');
+        return { success: true, message: 'Database reset successfully' };
+    } catch (error) {
+        console.error('Error resetting database:', error);
+        throw error;
+    }
+}
+
 // GET all users for dropdown
 app.get('/api/users', async (req, res) => {
     try {
