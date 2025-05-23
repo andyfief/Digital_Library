@@ -35,7 +35,6 @@ app.get('/', async function (req, res) {
 // GET all rentals with user and book details
 app.get('/api/rentals', async (req, res) => {
     try {
-
         const rentalsQuery = 'SELECT * FROM Rentals;';
         const [rentals] = await db.query(rentalsQuery);
         
@@ -47,46 +46,80 @@ app.get('/api/rentals', async (req, res) => {
     }
 });
 
-async function resetDatabase() {
+app.get('/api/genres', async (req, res) => {
     try {
-        await db.query('CALL reset_database();');
-        console.log('Database reset successfully');
-        return { success: true, message: 'Database reset successfully' };
+        const genresQuery = 'SELECT * FROM Genres ORDER BY genre_id;';
+        const [genres] = await db.query(genresQuery);
+        
+        const base = "<h1>Database Reset Complete!</h1>";
+        res.send(base + "<p>Genres data:</p>" + JSON.stringify(genres));
     } catch (error) {
-        console.error('Error resetting database:', error);
-        throw error;
-    }
-}
-
-// GET all users for dropdown
-app.get('/api/users', async (req, res) => {
-    try {
-        const [users] = await db.query('SELECT user_id, username FROM Users ORDER BY username');
-        res.json(users);
-    } catch (error) {
-        console.error('Error fetching users:', error);
-        res.status(500).json({ error: 'Failed to fetch users' });
+        console.error("Error executing queries:", error);
+        res.status(500).send("An error occurred while executing the database queries.");
     }
 });
+
+
+app.get('/api/users', async (req, res) => {
+    try {
+        const usersQuery = 'SELECT * FROM Users;';
+        const [users] = await db.query(usersQuery);
+        
+        const base = "<h1>Database Reset Complete!</h1>";
+        res.send(base + "<p>Users data:</p>" + JSON.stringify(users));
+    } catch (error) {
+        console.error("Error executing queries:", error);
+        res.status(500).send("An error occurred while executing the database queries.");
+    }
+});
+
+app.get('/api/authors', async (req, res) => {
+    try {
+        const authorsQuery = 'SELECT * FROM Authors;';
+        const [authors] = await db.query(authorsQuery);
+        
+        const base = "<h1>Database Reset Complete!</h1>";
+        res.send(base + "<p>Users data:</p>" + JSON.stringify(authors));
+    } catch (error) {
+        console.error("Error executing queries:", error);
+        res.status(500).send("An error occurred while executing the database queries.");
+    }
+});
+
 
 // GET all books for dropdown
 app.get('/api/books', async (req, res) => {
     try {
-        const [books] = await db.query('SELECT book_id, title FROM Books ORDER BY title');
-        res.json(books);
+        const booksQuery = 'SELECT * FROM Books;';
+        const [books] = await db.query(booksQuery);
+        
+        const base = "<h1>Database Reset Complete!</h1>";
+        res.send(base + "<p>Users data:</p>" + JSON.stringify(books));
     } catch (error) {
-        console.error('Error fetching books:', error);
-        res.status(500).json({ error: 'Failed to fetch books' });
+        console.error("Error executing queries:", error);
+        res.status(500).send("An error occurred while executing the database queries.");
     }
 });
 
+app.get('/api/relationships', async (req, res) => {
+    try {
+        const relationshipsQuery = 'SELECT * FROM Genres_Has_Books;';
+        const [relationships] = await db.query(relationshipsQuery);
+        
+        const base = "<h1>Database Reset Complete!</h1>";
+        res.send(base + "<p>Users data:</p>" + JSON.stringify(relationships));
+    } catch (error) {
+        console.error("Error executing queries:", error);
+        res.status(500).send("An error occurred while executing the database queries.");
+    }
+});
 
 // DELETE rental using your stored procedure
 app.delete('/api/rentals/:id', async (req, res) => {
     try {
         const rentalId = req.params.id;
         
-        // Call your delete_rental stored procedure
+        // Call the delete_rental stored procedure
         const [result] = await db.query('CALL delete_rental(?)', [rentalId]);
         
         // Check if the procedure returned an error message
@@ -101,9 +134,8 @@ app.delete('/api/rentals/:id', async (req, res) => {
     }
 });
 
-
 // Reset database endpoint
-app.post('/api/reset-database', async (req, res) => {
+app.post('/api/reset', async (req, res) => {
     try {
         await db.query('CALL reset_database();');
         res.json({ success: true, message: 'Database reset successfully' });

@@ -261,7 +261,25 @@
                 
             } catch (error) {
                 console.error('Error in loadRentals:', error);
-                showMessage('Error loading rentals: ' + error.message, 'error');
+            }
+        }
+
+        async function deleteRental(rentalId) {
+            if (confirm(`Are you sure you want to delete rental ${rentalId}?`)) {
+                try {
+                    const response = await fetch(`/api/rentals/${rentalId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        loadRentals(); // Reload the table
+                    }
+                } catch (error) {
+                    console.error('Error deleting rental:', error);
+                    showMessage('Error deleting rental: ' + error.message, 'error');
+                }
             }
         }
 

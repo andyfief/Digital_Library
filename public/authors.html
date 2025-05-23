@@ -140,62 +140,82 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>J.K. Rowling</td>
-                    <td>Best known for the Harry Potter series.</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>George Orwell</td>
-                    <td>I wrote animal farm!</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Rick Riordan</td>
-                    <td>New York Times bestselling author best known for the Percy Jackson & the Olympians series</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
+            <tbody id="authorsTableBody">
+                <!-- Data will be populated by JavaScript -->
             </tbody>
         </table>
     </section>
 
     <script>
-        function loadAuthorData() {
-            const authorId = document.getElementById('edit_author_id').value;
-            
-            // replace with SELECT
-            const authorData = {
-                '1': {
-                    name: 'J.K. Rowling',
-                    bio: 'Best known for the Harry Potter series.'
-                },
-                '2': {
-                    name: 'George Orwell',
-                    bio: 'I wrote animal farm!'
-                },
-                '3': {
-                    name: 'Rick Riordan',
-                    bio: 'New York Times bestselling author best known for the Percy Jackson & the Olympians series'
+        async function loadAuthors() {
+            console.log('loadAuthors() called');
+            try {
+                console.log('Fetching from /api/authors...');
+                const response = await fetch('/api/authors');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-            };
-            
-            if (authorId && authorData[authorId]) {
-                const author = authorData[authorId];
-                document.getElementById('edit_name').value = author.name;
-                document.getElementById('edit_bio').value = author.bio;
+                
+                // Get the HTML response
+                const htmlResponse = await response.text();
+                console.log('Raw response:', htmlResponse);
+                
+                // Extract JSON from the HTML response
+                // response format: "<h1>Database Reset Complete!</h1><p>Users data:</p>[{...}]"
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                console.log('Extracted JSON string:', jsonString);
+                
+                const authors = JSON.parse(jsonString);
+                console.log('Parsed authors data:', authors);
+                
+                // Populate the table
+                const tbody = document.getElementById('authorsTableBody');
+                if (!tbody) {
+                    console.error('Could not find authorsTableBody');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                if (authors.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No authors found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Create table rows for each rental
+                authors.forEach((author, index) => {
+                    console.log(`Processing author ${index + 1}:`, author);
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${author.author_id || 'N/A'}</td>
+                        <td>${author.name || 'N/A'}</td>
+                        <td>${author.bio || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="delete-btn" onclick="deleteAuthor(${author.author_id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`Successfully populated table with ${authors.length} authors`);
+                
+            } catch (error) {
+                console.error('Error in loadAuthors:', error);
             }
         }
         
@@ -204,6 +224,12 @@
             document.getElementById('edit_name').value = '';
             document.getElementById('edit_bio').value = '';
         }
+
+         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, ready to load authors');
+            loadAuthors();
+        });
+
     </script>
 
     <footer>

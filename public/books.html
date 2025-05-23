@@ -208,114 +208,95 @@
                     <th>Author</th>
                     <th>Publication Date</th>
                     <th>Quantity</th>
+                    <th>Description</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>J.K. Rowling</td>
-                    <td>1997-06-26</td>
-                    <td>10</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Animal Farm</td>
-                    <td>George Orwell</td>
-                    <td>1999-06-08</td>
-                    <td>8</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>The Lightning Thief</td>
-                    <td>Rick Riordan</td>
-                    <td>2005-02-01</td>
-                    <td>3</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
+            <tbody id="booksTableBody">
+                <!-- Data will be populated by JavaScript -->
             </tbody>
         </table>
     </section>
 
     <script>
-        function loadBookData() {
-            const bookId = document.getElementById('edit_book_id').value;
-            
-            // replace with SELECT
-            const bookData = {
-                '1': {
-                    title: 'Harry Potter and the Sorcerer\'s Stone',
-                    author_id: '1',
-                    publication_date: '1997-06-26',
-                    description: 'first harry potter book',
-                    cover_img_path: '/images/samplepath/1.jpg',
-                    total_qty: 10,
-                    genres: ['1', '3'] // Fantasy, Young Adult
-                },
-                '2': {
-                    title: 'Animal Farm',
-                    author_id: '2',
-                    publication_date: '1999-06-08',
-                    description: 'A book about pigs?',
-                    cover_img_path: '/images/samplepath/2.jpg',
-                    total_qty: 8,
-                    genres: ['2'] // Dystopian
-                },
-                '3': {
-                    title: 'The Lightning Thief',
-                    author_id: '3',
-                    publication_date: '2005-02-01',
-                    description: 'A young demigod goes on an adventure',
-                    cover_img_path: '/images/samplepath/3.jpg',
-                    total_qty: 3,
-                    genres: ['1', '3'] // Fantasy, Young Adult
-                }
-            };
-            
-            if (bookId && bookData[bookId]) {
-                const book = bookData[bookId];
-                document.getElementById('edit_title').value = book.title;
-                document.getElementById('edit_author').value = book.author_id;
-                document.getElementById('edit_publication_date').value = book.publication_date;
-                document.getElementById('edit_description').value = book.description;
-                document.getElementById('edit_cover_img_path').value = book.cover_img_path;
-                document.getElementById('edit_total_qty').value = book.total_qty;
+        async function loadBooks() {
+            console.log('loadBooks() called');
+            try {
+                console.log('Fetching from /api/books...');
+                const response = await fetch('/api/books');
+                console.log('Response status:', response.status);
                 
-                // Set genres
-                const genreSelect = document.getElementById('edit_genres');
-                for (let option of genreSelect.options) {
-                    option.selected = book.genres.includes(option.value);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                
+                // Get the HTML response
+                const htmlResponse = await response.text();
+                console.log('Raw response:', htmlResponse);
+                
+                // Extract JSON from the HTML response
+                // response format: "<h1>Database Reset Complete!</h1><p>Users data:</p>[{...}]"
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                console.log('Extracted JSON string:', jsonString);
+                
+                const books = JSON.parse(jsonString);
+                console.log('Parsed books data:', books);
+                
+                // Populate the table
+                const tbody = document.getElementById('booksTableBody');
+                if (!tbody) {
+                    console.error('Could not find booksTableBody');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                if (books.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No books found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Create table rows for each rental
+                books.forEach((book, index) => {
+                    console.log(`Processing book ${index + 1}:`, book);
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${book.book_id || 'N/A'}</td>
+                        <td>${book.title || 'N/A'}</td>
+                        <td>${book.author_id || 'N/A'}</td>
+                        <td>${book.publication_date || 'N/A'}</td>
+                        <td>${book.total_qty || 'N/A'}</td>
+                        <td>${book.description || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="delete-btn" onclick="deleteBook(${book.book_id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`Successfully populated table with ${books.length} books`);
+                
+            } catch (error) {
+                console.error('Error in loadBooks:', error);
             }
         }
-        
-        function clearEditForm() {
-            document.getElementById('edit_book_id').value = '';
-            document.getElementById('edit_title').value = '';
-            document.getElementById('edit_author').value = '';
-            document.getElementById('edit_publication_date').value = '';
-            document.getElementById('edit_description').value = '';
-            document.getElementById('edit_cover_img_path').value = '';
-            document.getElementById('edit_total_qty').value = '';
-            
-            // Clear genres
-            const genreSelect = document.getElementById('edit_genres');
-            for (let option of genreSelect.options) {
-                option.selected = false;
-            }
-        }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, ready to load books');
+            loadBooks();
+        });
     </script>
 
     <footer>

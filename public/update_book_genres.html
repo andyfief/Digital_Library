@@ -156,86 +156,91 @@
             <thead>
                 <tr>
                     <th>Book ID</th>
-                    <th>Book Title</th>
                     <th>Genre ID</th>
-                    <th>Genre Title</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>1</td>
-                    <td>Fantasy</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>1</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>3</td>
-                    <td>Young Adult</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Animal Farm</td>
-                    <td>2</td>
-                    <td>Dystopian</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>The Lightning Thief</td>
-                    <td>1</td>
-                    <td>Fantasy</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>The Lightning Thief</td>
-                    <td>3</td>
-                    <td>Young Adult</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                    </td>
-                </tr>
+            <tbody id="relationshipsTableBody">
+                <!-- Data will be populated by JavaScript -->
             </tbody>
         </table>
     </section>
 
     <script>
-        function loadRelationshipData() {
-            const relationshipId = document.getElementById('edit_relationship_id').value;
-            
-            // replace with SELECT
-            const relationshipData = {
-                '1-1': { book_id: '1', genre_id: '1' }, // Harry Potter - Fantasy
-                '1-3': { book_id: '1', genre_id: '3' }, // Harry Potter - Young Adult
-                '2-2': { book_id: '2', genre_id: '2' }, // Animal Farm - Dystopian
-                '3-1': { book_id: '3', genre_id: '1' }, // Lightning Thief - Fantasy
-                '3-3': { book_id: '3', genre_id: '3' }  // Lightning Thief - Young Adult
-            };
-            
-            if (relationshipId && relationshipData[relationshipId]) {
-                const relationship = relationshipData[relationshipId];
-                document.getElementById('edit_book').value = relationship.book_id;
-                document.getElementById('edit_genre').value = relationship.genre_id;
+        async function loadRelationships() {
+            console.log('loadRelationships() called');
+            try {
+                console.log('Fetching from /api/relationships...');
+                const response = await fetch('/api/relationships');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the HTML response
+                const htmlResponse = await response.text();
+                console.log('Raw response:', htmlResponse);
+                
+                // Extract JSON from the HTML response
+                // Your response format: "<h1>Database Reset Complete!</h1><p>Rentals data:</p>[{...}]"
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                console.log('Extracted JSON string:', jsonString);
+                
+                const relationships = JSON.parse(jsonString);
+                console.log('Parsed relationships data:', relationships);
+                
+                // Populate the table
+                const tbody = document.getElementById('relationshipsTableBody');
+                if (!tbody) {
+                    console.error('Could not find relationshipsTableBody');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                if (relationships.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No relationships found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Create table rows for each relationship
+                relationships.forEach((relationship, index) => {
+                    console.log(`Processing relationship ${index + 1}:`, relationship);
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${relationship.genre_id || 'N/A'}</td>
+                        <td>${relationship.book_id || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="delete-btn" onclick="deleteRental(${relationship.relationship_id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`Successfully populated table with ${relationships.length} rentals`);
+                
+            } catch (error) {
+                console.error('Error in loadrelationships:', error);
             }
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, ready to load rentals');
+            loadRelationships();
+        });
     </script>
 
     <footer>
