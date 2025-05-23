@@ -61,17 +61,25 @@
         .nav-links {
             margin-bottom: 20px;
         }
+        .edit-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Authors Management</h1>
         <div class="nav-links">
-            <a href="index.html">Back to Index</a> |
+            <a href="index.html">Home</a> |
             <a href="books.html">Books</a> |
+            <a href="authors.html">Authors</a> |
             <a href="genres.html">Genres</a> |
             <a href="users.html">Users</a> |
             <a href="rentals.html">Rentals</a>
+            <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
 
@@ -93,7 +101,36 @@
     </section>
 
     <section>
+        <h2>Edit Author</h2>
+        <form id="editAuthorForm">
+            <div>
+                <label for="edit_author_id">Author ID:</label>
+                <select id="edit_author_id" name="author_id" onchange="loadAuthorData()" required>
+                    <option value="">Select Author to Edit</option>
+                    <option value="1">1 - J.K. Rowling</option>
+                    <option value="2">2 - George Orwell</option>
+                    <option value="3">3 - Rick Riordan</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="edit_name">Name:</label>
+                <input type="text" id="edit_name" name="name" required>
+            </div>
+            
+            <div>
+                <label for="edit_bio">Biography:</label>
+                <textarea id="edit_bio" name="bio" rows="4"></textarea>
+            </div>
+            
+            <button type="submit">Update Author</button>
+            <button type="button" onclick="clearEditForm()">Clear Form</button>
+        </form>
+    </section>
+
+    <section>
         <h2>Existing Authors</h2>
+        <p>This table shows All authors. Data populated with: <code>SELECT * FROM Authors;</code></p>
         <table>
             <thead>
                 <tr>
@@ -135,8 +172,42 @@
         </table>
     </section>
 
+    <script>
+        function loadAuthorData() {
+            const authorId = document.getElementById('edit_author_id').value;
+            
+            // replace with SELECT
+            const authorData = {
+                '1': {
+                    name: 'J.K. Rowling',
+                    bio: 'Best known for the Harry Potter series.'
+                },
+                '2': {
+                    name: 'George Orwell',
+                    bio: 'I wrote animal farm!'
+                },
+                '3': {
+                    name: 'Rick Riordan',
+                    bio: 'New York Times bestselling author best known for the Percy Jackson & the Olympians series'
+                }
+            };
+            
+            if (authorId && authorData[authorId]) {
+                const author = authorData[authorId];
+                document.getElementById('edit_name').value = author.name;
+                document.getElementById('edit_bio').value = author.bio;
+            }
+        }
+        
+        function clearEditForm() {
+            document.getElementById('edit_author_id').value = '';
+            document.getElementById('edit_name').value = '';
+            document.getElementById('edit_bio').value = '';
+        }
+    </script>
+
     <footer>
-        <p>© 2025 Library Management System</p>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
     </footer>
 </body>
 </html>

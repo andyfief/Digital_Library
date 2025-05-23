@@ -64,17 +64,25 @@
         .books-in-genre {
             margin-top: 30px;
         }
+        .edit-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Genres Management</h1>
         <div class="nav-links">
-            <a href="index.html">Back to Index</a> |
+            <a href="index.html">Home</a> |
             <a href="books.html">Books</a> |
             <a href="authors.html">Authors</a> |
+            <a href="genres.html">Genres</a> |
             <a href="users.html">Users</a> |
             <a href="rentals.html">Rentals</a>
+            <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
 
@@ -87,6 +95,29 @@
             </div>
             
             <button type="submit">Add Genre</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Edit Genre</h2>
+        <form id="editGenreForm">
+            <div>
+                <label for="edit_genre_id">Genre ID:</label>
+                <select id="edit_genre_id" name="genre_id" onchange="loadGenreData()" required>
+                    <option value="">Select Genre to Edit</option>
+                    <option value="1">1 - Fantasy</option>
+                    <option value="2">2 - Dystopian</option>
+                    <option value="3">3 - Young Adult</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="edit_title">Title:</label>
+                <input type="text" id="edit_title" name="title" required>
+            </div>
+            
+            <button type="submit">Update Genre</button>
+            <button type="button" onclick="clearEditForm()">Clear Form</button>
         </form>
     </section>
 
@@ -132,33 +163,31 @@
         </table>
     </section>
 
-    <section class="books-in-genre">
-        <h2>Books in Fantasy Genre</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Author</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>J.K. Rowling</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>The Lightning Thief</td>
-                    <td>Rick Riordan</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <script>
+        function loadGenreData() {
+            const genreId = document.getElementById('edit_genre_id').value;
+            
+            /// replace with SELECT
+            const genreData = {
+                '1': { title: 'Fantasy' },
+                '2': { title: 'Dystopian' },
+                '3': { title: 'Young Adult' }
+            };
+            
+            if (genreId && genreData[genreId]) {
+                const genre = genreData[genreId];
+                document.getElementById('edit_title').value = genre.title;
+            }
+        }
+        
+        function clearEditForm() {
+            document.getElementById('edit_genre_id').value = '';
+            document.getElementById('edit_title').value = '';
+        }
+    </script>
 
     <footer>
-        <p>© 2025 Library Management System</p>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
     </footer>
 </body>
 </html>

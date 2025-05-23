@@ -22,9 +22,38 @@
         a:hover {
             text-decoration: underline;
         }
+        .nav-links {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: #f2f2f2;
+            border: 1px solid #ddd;
+        }
+        .reset-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .reset-button:hover {
+            background-color: #ff5252;
+        }
     </style>
 </head>
 <body>
+    <div class="nav-links">
+        <strong>Navigation:</strong>
+        <a href="index.html">Home</a> |
+        <a href="books.html">Books</a> |
+        <a href="authors.html">Authors</a> |
+        <a href="genres.html">Genres</a> |
+        <a href="users.html">Users</a> |
+        <a href="rentals.html">Rentals</a>
+        <a href="update_book_genres.html">Book Genres</a>
+    </div>
+
     <h1>Library Management System - Index Page</h1>
     <p>Welcome to the Library Management System. Use the links below to navigate to different sections:</p>
     
@@ -53,12 +82,21 @@
             <h3><a href="rentals.html">Rentals Management</a></h3>
             <p>Track book rentals, returns, and availability.</p>
         </div>
-
-        <div class="page-link">
-            <h3><a href="update_book_genres.html">Update Book Genres</a></h3>
-            <p>Update Book/Genre relationships.</p>
-        </div>
     </div>
+
+    <div>
+        <button class="reset-button" onclick="resetDatabase()">RESET DATABASE</button>
+        <p><em>This button resets all data to the original sample data (calls the reset_database stored procedure).</em></p>
+    </div>
+
+    <script>
+        function resetDatabase() {
+            // add reset call here
+        }
+    </script>
     
+    <footer>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
+    </footer>
 </body>
 </html>

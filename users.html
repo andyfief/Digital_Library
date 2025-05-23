@@ -61,17 +61,25 @@
         .nav-links {
             margin-bottom: 20px;
         }
+        .edit-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <header>
         <h1>Users Management</h1>
         <div class="nav-links">
-            <a href="index.html">Back to Index</a> |
+            <a href="index.html">Home</a> |
             <a href="books.html">Books</a> |
             <a href="authors.html">Authors</a> |
             <a href="genres.html">Genres</a> |
+            <a href="users.html">Users</a> |
             <a href="rentals.html">Rentals</a>
+            <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
 
@@ -94,6 +102,39 @@
             </div>
             
             <button type="submit">Add User</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Edit User</h2>
+        <form id="editUserForm">
+            <div>
+                <label for="edit_user_id">User ID:</label>
+                <select id="edit_user_id" name="user_id" onchange="loadUserData()" required>
+                    <option value="">Select User to Edit</option>
+                    <option value="1">1 - fiefa</option>
+                    <option value="2">2 - arorae</option>
+                    <option value="3">3 - bookLuvr2004</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="edit_username">Username:</label>
+                <input type="text" id="edit_username" name="username" required>
+            </div>
+            
+            <div>
+                <label for="edit_email">Email:</label>
+                <input type="email" id="edit_email" name="email" required>
+            </div>
+            
+            <div>
+                <label for="edit_password">Password (leave blank to keep current):</label>
+                <input type="password" id="edit_password" name="password" placeholder="Leave blank to keep current password">
+            </div>
+            
+            <button type="submit">Update User</button>
+            <button type="button" onclick="clearEditForm()">Clear Form</button>
         </form>
     </section>
 
@@ -140,8 +181,44 @@
         </table>
     </section>
 
+    <script>
+        function loadUserData() {
+            const userId = document.getElementById('edit_user_id').value;
+            
+            // replace with SELECT
+            const userData = {
+                '1': {
+                    username: 'fiefa',
+                    email: 'fiefa@oregonstate.edu'
+                },
+                '2': {
+                    username: 'arorae',
+                    email: 'arorae@oregonstate.edu'
+                },
+                '3': {
+                    username: 'bookLuvr2004',
+                    email: 'BookLover1234@gmail.com'
+                }
+            };
+            
+            if (userId && userData[userId]) {
+                const user = userData[userId];
+                document.getElementById('edit_username').value = user.username;
+                document.getElementById('edit_email').value = user.email;
+                document.getElementById('edit_password').value = ''; // Never pre-fill password
+            }
+        }
+        
+        function clearEditForm() {
+            document.getElementById('edit_user_id').value = '';
+            document.getElementById('edit_username').value = '';
+            document.getElementById('edit_email').value = '';
+            document.getElementById('edit_password').value = '';
+        }
+    </script>
+
     <footer>
-        <p>© 2025 Library Management System</p>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
     </footer>
 </body>
 </html>
