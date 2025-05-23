@@ -126,64 +126,92 @@
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Actions</th>
+                    <th>Genre ID</th>
+                    <th>title</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Fantasy</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                        <button>View Books</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Dystopian</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                        <button>View Books</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Young Adult</td>
-                    <td class="actions">
-                        <button>Edit</button>
-                        <button>Delete</button>
-                        <button>View Books</button>
-                    </td>
-                </tr>
+            <tbody id="genresTableBody">
+                <!-- Data will be populated by JavaScript -->
             </tbody>
         </table>
     </section>
 
     <script>
-        function loadGenreData() {
-            const genreId = document.getElementById('edit_genre_id').value;
-            
-            /// replace with SELECT
-            const genreData = {
-                '1': { title: 'Fantasy' },
-                '2': { title: 'Dystopian' },
-                '3': { title: 'Young Adult' }
-            };
-            
-            if (genreId && genreData[genreId]) {
-                const genre = genreData[genreId];
-                document.getElementById('edit_title').value = genre.title;
+        async function loadGenres() {
+            console.log('loadGenres() called');
+            try {
+                console.log('Fetching from /api/genres...');
+                const response = await fetch('/api/genres');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the HTML response
+                const htmlResponse = await response.text();
+                console.log('Raw response:', htmlResponse);
+                
+                // Extract JSON from the HTML response
+                // Your response format: "<h1>Database Reset Complete!</h1><p>genres data:</p>[{...}]"
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                console.log('Extracted JSON string:', jsonString);
+                
+                const genres = JSON.parse(jsonString);
+                console.log('Parsed genres data:', genres);
+                
+                // Populate the table
+                const tbody = document.getElementById('genresTableBody');
+                if (!tbody) {
+                    console.error('Could not find genresTableBody');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                if (genres.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No genres found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Create table rows for each rental
+                genres.forEach((genre, index) => {
+                    console.log(`Processing genre ${index + 1}:`, genre);
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${genre.genre_id || 'N/A'}</td>
+                        <td>${genre.title || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="delete-btn" onclick="deletegenre(${genre.genre_id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`Successfully populated table with ${genres.length} genres`);
+                
+            } catch (error) {
+                console.error('Error in loadgenres:', error);
             }
         }
-        
-        function clearEditForm() {
-            document.getElementById('edit_genre_id').value = '';
-            document.getElementById('edit_title').value = '';
-        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, ready to load rentals');
+            loadGenres();
+        });
     </script>
 
     <footer>
