@@ -67,14 +67,17 @@
     <header>
         <h1>Rentals Management</h1>
         <div class="nav-links">
-            <a href="index.html">Back to Index</a> |
+            <a href="index.html">Home</a> |
             <a href="books.html">Books</a> |
             <a href="authors.html">Authors</a> |
             <a href="genres.html">Genres</a> |
-            <a href="users.html">Users</a>
+            <a href="users.html">Users</a> |
+            <a href="rentals.html">Rentals</a> |
+            <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
 
+    <div id="message"></div>
     <section>
         <h2>Create New Rental</h2>
         <form id="createRentalForm">
@@ -92,6 +95,9 @@
                 <label for="book">Book:</label>
                 <select id="book" name="book_id" required>
                     <option value="">Select Book</option>
+                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
+                    <option value="2">Animal Farm</option>
+                    <option value="3">The Lightning Thief</option>
                 </select>
             </div>
             
@@ -110,129 +116,163 @@
     </section>
 
     <section>
-        <h2>Update Rental</h2>
-        <form id="updateRentalForm">
+        <h2>Edit Rental</h2>
+        <form id="editRentalForm">
             <div>
-                <label for="user">User:</label>
-                <select id="user" name="user_id" required>
-                    <option value="">Select Rental</option>
+                <label for="edit_rental_id">Rental ID:</label>
+                <select id="edit_rental_id" name="rental_id" onchange="loadRentalData()" required>
+                    <option value="">Select Rental to Edit</option>
+                    <option value="1">1 - fiefa (Harry Potter)</option>
+                    <option value="2">2 - bookLuvr2004 (Harry Potter) - Returned</option>
+                    <option value="3">3 - bookLuvr2004 (Animal Farm)</option>
+                    <option value="4">4 - bookLuvr2004 (Lightning Thief)</option>
                 </select>
             </div>
             
             <div>
-                <label for="book">New Book Title:</label>
-                <select id="book" name="book_id" required>
+                <label for="edit_user">User:</label>
+                <select id="edit_user" name="user_id" required>
+                    <option value="">Select User</option>
+                    <option value="1">fiefa</option>
+                    <option value="2">arorae</option>
+                    <option value="3">bookLuvr2004</option>
                 </select>
             </div>
             
             <div>
-                <label for="date">New Rental Date:</label>
-                <input type="date" id="date" name="date" required>
+                <label for="edit_book">Book:</label>
+                <select id="edit_book" name="book_id" required>
+                    <option value="">Select Book</option>
+                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
+                    <option value="2">Animal Farm</option>
+                    <option value="3">The Lightning Thief</option>
+                </select>
             </div>
             
             <div>
-                <label for="expiration_date">New Expiration Date:</label>
-                <input type="date" id="expiration_date" name="expiration_date" required>
+                <label for="edit_date">Rental Date:</label>
+                <input type="date" id="edit_date" name="date" required>
+            </div>
+            
+            <div>
+                <label for="edit_expiration_date">Expiration Date:</label>
+                <input type="date" id="edit_expiration_date" name="expiration_date" required>
+            </div>
+            
+            <div>
+                <label for="edit_date_returned">Return Date (leave blank if not returned):</label>
+                <input type="date" id="edit_date_returned" name="date_returned">
             </div>
             
             <button type="submit">Update Rental</button>
+            <button type="button" onclick="clearEditForm()">Clear Form</button>
         </form>
     </section>
-
     <section>
-        <h2>Current Rentals</h2>
+        <h2>Rentals Table</h2>
         <table>
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>User</th>
-                    <th>Book</th>
+                    <th>Rental ID</th>
+                    <th>User ID</th>
+                    <th>Book ID</th>
                     <th>Rental Date</th>
-                    <th>Due Date</th>
+                    <th>Expiration Date</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>fiefa</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>2025-04-01</td>
-                    <td>2025-04-15</td>
-                    <td class="actions">
-                        <button>Return Book</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>bookLuvr2004</td>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>2024-02-01</td>
-                    <td>2024-02-15</td>
-                    <td class="actions">
-                        <button>Return Book</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>bookLuvr2004</td>
-                    <td>Animal Farm</td>
-                    <td>2024-02-03</td>
-                    <td>2024-02-17</td>
-                    <td class="actions">
-                        <button>Return Book</button>
-                    </td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>bookLuvr2004</td>
-                    <td>The Lightning Thief</td>
-                    <td>2024-02-29</td>
-                    <td>2024-03-14</td>
-                    <td class="actions">
-                        <button>Return Book</button>
-                    </td>
-                </tr>
+            <tbody id="rentalsTableBody">
+                <!-- Data will be populated by JavaScript -->
             </tbody>
         </table>
     </section>
 
-    <section>
-        <h2>Book Availability</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Book Title</th>
-                    <th>Total Quantity</th>
-                    <th>Currently Rented</th>
-                    <th>Available</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Harry Potter and the Sorcerer's Stone</td>
-                    <td>10</td>
-                    <td>2</td>
-                    <td>8</td>
-                </tr>
-                <tr>
-                    <td>Animal Farm</td>
-                    <td>8</td>
-                    <td>1</td>
-                    <td>7</td>
-                </tr>
-                <tr>
-                    <td>The Lightning Thief</td>
-                    <td>3</td>
-                    <td>1</td>
-                    <td>2</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+    <script>
+        async function loadRentals() {
+            console.log('loadRentals() called');
+            try {
+                console.log('Fetching from /api/rentals...');
+                const response = await fetch('/api/rentals');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the HTML response
+                const htmlResponse = await response.text();
+                console.log('Raw response:', htmlResponse);
+                
+                // Extract JSON from the HTML response
+                // Your response format: "<h1>Database Reset Complete!</h1><p>Rentals data:</p>[{...}]"
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                console.log('Extracted JSON string:', jsonString);
+                
+                const rentals = JSON.parse(jsonString);
+                console.log('Parsed rentals data:', rentals);
+                
+                // Populate the table
+                const tbody = document.getElementById('rentalsTableBody');
+                if (!tbody) {
+                    console.error('Could not find rentalsTableBody');
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                if (rentals.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                                No rentals found
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Create table rows for each rental
+                rentals.forEach((rental, index) => {
+                    console.log(`Processing rental ${index + 1}:`, rental);
+                    const row = document.createElement('tr');
+                    
+                    const expirationDate = new Date(rental.expiration_date);
+
+                    row.innerHTML = `
+                        <td>${rental.rental_id || 'N/A'}</td>
+                        <td>${rental.user_id || 'N/A'}</td>
+                        <td>${rental.book_id || 'N/A'}</td>
+                        <td>${rental.date || 'N/A'}</td>
+                        <td>${rental.expiration_date || 'N/A'}</td>
+                        <td class="actions">
+                            <button class="delete-btn" onclick="deleteRental(${rental.rental_id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                console.log(`Successfully populated table with ${rentals.length} rentals`);
+                
+            } catch (error) {
+                console.error('Error in loadRentals:', error);
+                showMessage('Error loading rentals: ' + error.message, 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, ready to load rentals');
+            loadRentals();
+        });
+    </script>
 
     <footer>
-        <p>© 2025 Library Management System</p>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
     </footer>
 </body>
 </html>
