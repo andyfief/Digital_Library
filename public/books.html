@@ -222,6 +222,7 @@
     </section>
 
     <script>
+        console.log('Books script loaded');
         async function loadBooks() {
             console.log('loadBooks() called');
             try {
@@ -296,6 +297,26 @@
                 console.error('Error in loadBooks:', error);
             }
         }
+
+         async function deleteBook(bookId) {
+            if (confirm(`Are you sure you want to delete book ${bookId}?`)) {
+                try {
+                    const response = await fetch(`/api/books/${bookId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        loadBooks(); // Reload the table
+                    }
+                } catch (error) {
+                    console.error('Error deleting book:', error);
+                    showMessage('Error deleting book: ' + error.message, 'error');
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, ready to load books');
             loadBooks();

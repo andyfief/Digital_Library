@@ -114,7 +114,7 @@ app.get('/api/relationships', async (req, res) => {
     }
 });
 
-// DELETE rental using your stored procedure
+// DELETE rental using stored procedure
 app.delete('/api/rentals/:id', async (req, res) => {
     try {
         const rentalId = req.params.id;
@@ -131,6 +131,45 @@ app.delete('/api/rentals/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting rental:', error);
         res.status(500).json({ error: 'Failed to delete rental' });
+    }
+});
+
+// POST new rental using stored procedure
+app.post('/api/rentals', async (req, res) => {
+    try {
+        const { user_id, book_id, date, expiration_date } = req.body;
+        
+        // Call the add_rental stored procedure
+        const [result] = await db.query('CALL add_rental(?, ?, ?, ?)', [user_id, book_id, date, expiration_date]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Rental created successfully', rental_id: result[0].rental_id });
+        }
+    } catch (error) {
+        console.error('Error creating rental:', error);
+        res.status(500).json({ error: 'Failed to create rental' });
+    }
+});
+
+app.delete('/api/books/:id', async (req, res) => {
+    try {
+        const bookId = req.params.id;
+        
+        // Call the delete_rental stored procedure
+        const [result] = await db.query('CALL delete_book(?)', [bookId]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Book deleted successfully' });
+        }
+    } catch (error) {
+        console.error('Error deleting book:', error);
+        res.status(500).json({ error: 'Failed to delete book' });
     }
 });
 
