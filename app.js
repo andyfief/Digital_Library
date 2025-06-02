@@ -154,6 +154,31 @@ app.post('/api/rentals', async (req, res) => {
     }
 });
 
+// Update rental using stored procedure
+app.put('/api/rentals/:id', async (req, res) => {
+    try {
+        const rentalId = req.params.id;
+        const { user_id, book_id, date, expiration_date, date_returned } = req.body;
+
+        console.log('Update rental data:', { rentalId, user_id, book_id, date, expiration_date, date_returned });
+
+        // Call the update_rental stored procedure
+        const [result] = await db.query('CALL update_rental(?, ?, ?, ?, ?)', [rentalId, user_id, book_id, date, expiration_date]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Rental updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating rental:', error);
+        res.status(500).json({ error: 'Failed to update rental' });
+    }
+});
+
 app.delete('/api/books/:id', async (req, res) => {
     try {
         const bookId = req.params.id;
