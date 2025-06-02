@@ -27,7 +27,6 @@ BEGIN
         author_id INT NOT NULL, -- a book is linked to an author
         publication_date DATE NOT NULL, -- note that date types follow YYYY-MM-DD
         description TEXT, -- large enough for a long description
-        cover_img_path VARCHAR(255), -- ./a path to where the cover images for the library are stored/this_books_cover
         total_qty INT NOT NULL, -- quanitity of books on hand
         FOREIGN KEY (author_id) REFERENCES Authors(author_id) -- sets the author id as foreign key referencing the authors table
             ON UPDATE CASCADE 
@@ -77,10 +76,10 @@ BEGIN
     ('George Orwell', 'I wrote animal farm!'),
     ('Rick Riordan', 'New York Times bestselling author best known for the Percy Jackson & the Olympians series');
 
-    INSERT INTO Books (title, author_id, publication_date, description, cover_img_path, total_qty) VALUES
-    ('Harry Potter and the Sorcerer''s Stone', 1, '1997-06-26', 'first harry potter book', '/images/samplepath/1.jpg', 10),
-    ('Animal Farm', 2, '1999-06-08', 'A book about pigs?', '/images/samplepath/2.jpg', 8),
-    ('The Lightning Thief', 3, '2005-02-01', 'A young demigod goes on an adventure', '/images/samplepath/3.jpg', 3);
+    INSERT INTO Books (title, author_id, publication_date, description, total_qty) VALUES
+    ('Harry Potter and the Sorcerer''s Stone', 1, '1997-06-26', 'first harry potter book', 10),
+    ('Animal Farm', 2, '1999-06-08', 'A book about pigs?', 8),
+    ('The Lightning Thief', 3, '2005-02-01', 'A young demigod goes on an adventure', 3);
 
     INSERT INTO Genres (title) VALUES 
     ('Fantasy'), 

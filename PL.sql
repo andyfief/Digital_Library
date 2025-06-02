@@ -69,6 +69,7 @@ BEGIN
     
 END//
 
+
 DROP PROCEDURE IF EXISTS update_rental//
 
 CREATE PROCEDURE update_rental(
@@ -140,6 +141,86 @@ BEGIN
         SELECT CONCAT('Book ID ', p_book_id, ' has been deleted.') AS message;
     ELSE
         SELECT CONCAT('Error: Book ID ', p_book_id, ' not found.') AS error_message;
+    END IF;
+    
+END//
+
+
+DROP PROCEDURE IF EXISTS add_book//
+
+CREATE PROCEDURE add_book(
+    IN p_title VARCHAR(255),
+    IN p_author_id INT,
+    IN p_publication_date DATE,
+    IN p_description TEXT,
+    IN p_total_qty INT
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE author_exists INT DEFAULT 0;
+    DECLARE new_book_id INT DEFAULT 0;
+    
+    -- Check if the author exists
+    SELECT COUNT(*) INTO author_exists 
+    FROM Authors 
+    WHERE author_id = p_author_id;
+    
+    -- Only add book if author exists
+    IF author_exists = 0 THEN
+        SELECT CONCAT('Error: Author ID ', p_author_id, ' not found.') AS error_message;
+    ELSE
+        INSERT INTO Books (title, author_id, publication_date, description, total_qty)
+        VALUES (p_title, p_author_id, p_publication_date, p_description, p_total_qty);
+        
+        SET new_book_id = LAST_INSERT_ID();
+        
+        SELECT CONCAT('Book ID ', new_book_id, ' has been created successfully.') AS message,
+               new_book_id AS book_id;
+    END IF;
+    
+END//
+
+
+DROP PROCEDURE IF EXISTS update_book//
+
+CREATE PROCEDURE update_book(
+    IN p_book_id INT,
+    IN p_new_title VARCHAR(255),
+    IN p_new_author_id INT,
+    IN p_new_publication_date DATE,
+    IN p_new_description TEXT,
+    IN p_new_total_qty INT
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE book_exists INT DEFAULT 0;
+    DECLARE author_exists INT DEFAULT 0;
+    
+    -- Check if the book exists
+    SELECT COUNT(*) INTO book_exists 
+    FROM Books 
+    WHERE book_id = p_book_id;
+    
+    -- Check if the new author exists
+    SELECT COUNT(*) INTO author_exists 
+    FROM Authors 
+    WHERE author_id = p_new_author_id;
+    
+    -- Only edit book if book and author exist
+    IF book_exists = 0 THEN
+        SELECT CONCAT('Error: Book ID ', p_book_id, ' not found.') AS error_message;
+    ELSEIF author_exists = 0 THEN
+        SELECT CONCAT('Error: Author ID ', p_new_author_id, ' not found.') AS error_message;
+    ELSE
+        UPDATE Books
+        SET title = p_new_title,
+            author_id = p_new_author_id,
+            publication_date = p_new_publication_date,
+            description = p_new_description,
+            total_qty = p_new_total_qty
+        WHERE book_id = p_book_id;
+        
+        SELECT CONCAT('Book ID ', p_book_id, ' has been updated successfully.') AS message;
     END IF;
     
 END//

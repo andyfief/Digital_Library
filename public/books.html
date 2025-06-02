@@ -115,11 +115,6 @@
             </div>
             
             <div>
-                <label for="cover_img_path">Cover Image Path:</label>
-                <input type="text" id="cover_img_path" name="cover_img_path">
-            </div>
-            
-            <div>
                 <label for="total_qty">Total Quantity:</label>
                 <input type="number" id="total_qty" name="total_qty" min="1" required>
             </div>
@@ -174,11 +169,6 @@
             <div>
                 <label for="edit_description">Description:</label>
                 <textarea id="edit_description" name="description" rows="4"></textarea>
-            </div>
-            
-            <div>
-                <label for="edit_cover_img_path">Cover Image Path:</label>
-                <input type="text" id="edit_cover_img_path" name="cover_img_path">
             </div>
             
             <div>
@@ -316,6 +306,95 @@
                 }
             }
         }
+
+        async function createBook(formData) {
+            try {
+                const response = await fetch('/api/books', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('Book created successfully:', result.message);
+                    document.getElementById('addBookForm').reset();
+                    loadBooks(); // Reload the table
+                } else {
+                    console.log('Error creating book:', result.error);
+                }
+            } catch (error) {
+                console.error('Error creating book:', error);
+            }
+        }
+
+        async function updateBook(bookId, formData) {
+            try {
+                const response = await fetch(`/api/books/${bookId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('Book updated successfully:', result.message);
+                    clearEditForm();
+                    loadBooks(); // Reload the table
+                } else {
+                    console.log('Error updating book:', result.error);
+                }
+            } catch (error) {
+                console.error('Error updating book:', error);
+            }
+        }
+
+        function clearEditForm() {
+            document.getElementById('editBookForm').reset();
+        }
+
+        document.getElementById('addBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const bookData = {
+                title: formData.get('title'),
+                author_id: parseInt(formData.get('author_id')),
+                publication_date: formData.get('publication_date'),
+                description: formData.get('description') || null,
+                total_qty: parseInt(formData.get('total_qty'))
+            };
+            
+            createBook(bookData);
+        });
+
+        document.getElementById('editBookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const bookId = formData.get('book_id');
+            
+            if (!bookId) {
+                console.log('Please select a book to edit');
+                return;
+            }
+            
+            const bookData = {
+                title: formData.get('title'),
+                author_id: parseInt(formData.get('author_id')),
+                publication_date: formData.get('publication_date'),
+                description: formData.get('description') || null,
+                total_qty: parseInt(formData.get('total_qty'))
+            };
+            
+            updateBook(bookId, bookData);
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, ready to load books');
