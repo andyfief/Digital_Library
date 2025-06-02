@@ -188,6 +188,7 @@
     </section>
 
     <script>
+        console.log('rentals script')
         async function loadRentals() {
             console.log('loadRentals() called');
             try {
@@ -278,10 +279,46 @@
                     }
                 } catch (error) {
                     console.error('Error deleting rental:', error);
-                    showMessage('Error deleting rental: ' + error.message, 'error');
                 }
             }
         }
+
+        async function createRental(formData) {
+            try {
+                const response = await fetch('/api/rentals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('createRentalForm').reset();
+                    loadRentals(); // Reload the table
+                } else {
+                    console.log('rental response not OK');
+                }
+            } catch (error) {
+                console.error('Error creating rental:', error);
+            }
+        }
+
+        document.getElementById('createRentalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const rentalData = {
+                user_id: parseInt(formData.get('user_id')),
+                book_id: parseInt(formData.get('book_id')),
+                date: formData.get('date'),
+                expiration_date: formData.get('expiration_date')
+            };
+            
+            createRental(rentalData);
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Page loaded, ready to load rentals');
