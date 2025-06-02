@@ -179,6 +179,51 @@ app.put('/api/rentals/:id', async (req, res) => {
     }
 });
 
+// POST new book using stored procedure
+app.post('/api/books', async (req, res) => {
+    try {
+        const { title, author_id, publication_date, description, total_qty } = req.body;
+        
+        // Call the add_book stored procedure
+        const [result] = await db.query('CALL add_book(?, ?, ?, ?, ?)', [title, author_id, publication_date, description, total_qty]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Book created successfully', book_id: result[0].book_id });
+        }
+    } catch (error) {
+        console.error('Error creating book:', error);
+        res.status(500).json({ error: 'Failed to create book' });
+    }
+});
+
+// Update book using stored procedure
+app.put('/api/books/:id', async (req, res) => {
+    try {
+        const bookId = req.params.id;
+        const { title, author_id, publication_date, description, total_qty } = req.body;
+
+        console.log('Update book data:', { bookId, title, author_id, publication_date, description, total_qty });
+
+        // Call the update_book stored procedure
+        const [result] = await db.query('CALL update_book(?, ?, ?, ?, ?, ?)', [bookId, title, author_id, publication_date, description, total_qty]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Book updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating book:', error);
+        res.status(500).json({ error: 'Failed to update book' });
+    }
+});
+
 app.delete('/api/books/:id', async (req, res) => {
     try {
         const bookId = req.params.id;

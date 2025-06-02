@@ -21,8 +21,8 @@ JOIN Genres_Has_Books ghb ON g.genre_id = ghb.genre_id
 WHERE ghb.book_id = @bookId;
 
 -- Create a new book
-INSERT INTO Books (title, author_id, publication_date, description, cover_img_path, total_qty) 
-VALUES (@title, @authorId, @publicationDate, @description, @coverImgPath, @totalQty);
+INSERT INTO Books (title, author_id, publication_date, description, total_qty) 
+VALUES (@title, @authorId, @publicationDate, @description, @totalQty);
 
 -- Add genres to a book (many-to-many relationship)
 INSERT INTO Genres_Has_Books (genre_id, book_id) 
@@ -31,7 +31,7 @@ VALUES (@genreId, @bookId);
 -- Update a book
 UPDATE Books 
 SET title = @title, author_id = @authorId, publication_date = @publicationDate,
-    description = @description, cover_img_path = @coverImgPath, total_qty = @totalQty 
+    description = @description, total_qty = @totalQty 
 WHERE book_id = @bookId;
 
 -- Delete book's genre relationships
