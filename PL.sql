@@ -69,6 +69,56 @@ BEGIN
     
 END//
 
+DROP PROCEDURE IF EXISTS update_rental//
+
+CREATE PROCEDURE update_rental(
+    IN p_rental_id INT,
+    IN p_new_user_id INT,
+    IN p_new_book_id INT,
+    IN p_new_date DATE,
+    IN p_new_exp_date DATE
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE rental_exists INT DEFAULT 0;
+    DECLARE book_exists INT DEFAULT 0;
+    DECLARE user_exists INT DEFAULT 0;
+    
+    -- Check if the rental exists
+    SELECT COUNT(*) INTO rental_exists 
+    FROM Rentals 
+    WHERE rental_id = p_rental_id;
+    
+    -- Check if the new book exists
+    SELECT COUNT(*) INTO book_exists 
+    FROM Books 
+    WHERE book_id = p_new_book_id;
+
+    -- Check if the new user exists
+    SELECT COUNT(*) INTO user_exists 
+    FROM Users 
+    WHERE user_id = p_new_user_id;
+    
+    -- Only edit rental if rental, user and book exist
+    IF rental_exists = 0 THEN
+        SELECT CONCAT('Error: Rental ID ', p_rental_id, ' not found.') AS error_message;
+    ELSEIF user_exists = 0 THEN
+        SELECT CONCAT('Error: User ID ', p_new_user_id, ' not found.') AS error_message;
+    ELSEIF book_exists = 0 THEN
+        SELECT CONCAT('Error: Book ID ', p_new_book_id, ' not found.') AS error_message;
+    ELSE
+        UPDATE Rentals
+        SET user_id = p_new_user_id,
+            book_id = p_new_book_id,
+            date = p_new_date,
+            expiration_date = p_new_exp_date
+        WHERE rental_id = p_rental_id;
+        
+        SELECT CONCAT('Rental ID ', p_rental_id, ' has been updated successfully.') AS message;
+    END IF;
+    
+END//
+
 
 DROP PROCEDURE IF EXISTS delete_book//
 

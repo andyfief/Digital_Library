@@ -120,7 +120,7 @@
         <form id="editRentalForm">
             <div>
                 <label for="edit_rental_id">Rental ID:</label>
-                <select id="edit_rental_id" name="rental_id" onchange="loadRentalData()" required>
+                <select id="edit_rental_id" name="rental_id">
                     <option value="">Select Rental to Edit</option>
                     <option value="1">1 - fiefa (Harry Potter)</option>
                     <option value="2">2 - bookLuvr2004 (Harry Potter) - Returned</option>
@@ -157,11 +157,6 @@
             <div>
                 <label for="edit_expiration_date">Expiration Date:</label>
                 <input type="date" id="edit_expiration_date" name="expiration_date" required>
-            </div>
-            
-            <div>
-                <label for="edit_date_returned">Return Date (leave blank if not returned):</label>
-                <input type="date" id="edit_date_returned" name="date_returned">
             </div>
             
             <button type="submit">Update Rental</button>
@@ -304,6 +299,56 @@
             } catch (error) {
                 console.error('Error creating rental:', error);
             }
+        }
+
+        async function updateRental(rentalId, formData) {
+            try {
+                const response = await fetch(`/api/rentals/${rentalId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    console.log('Rental updated successfully:', result.message);
+                    clearEditForm();
+                    loadRentals(); // Reload the table
+                } else {
+                    console.log('Error updating rental:', result.error);
+                }
+            } catch (error) {
+                console.error('Error updating rental:', error);
+            }
+        }
+
+        document.getElementById('editRentalForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const rentalId = formData.get('rental_id');
+            
+            if (!rentalId) {
+                console.log('Please select a rental to edit');
+                return;
+            }
+            
+            const rentalData = {
+                user_id: parseInt(formData.get('user_id')),
+                book_id: parseInt(formData.get('book_id')),
+                date: formData.get('date'),
+                expiration_date: formData.get('expiration_date'),
+                date_returned: formData.get('date_returned') || null
+            };
+            
+            updateRental(rentalId, rentalData);
+        });
+
+        function clearEditForm() {
+            document.getElementById('editRentalForm').reset();
         }
 
         document.getElementById('createRentalForm').addEventListener('submit', function(e) {
