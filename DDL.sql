@@ -60,9 +60,10 @@ BEGIN
     );
 
     CREATE TABLE Genres_Has_Books ( -- an intersection table between genres and books supporting M:M
+        relationship_id INT AUTO_INCREMENT PRIMARY KEY,
         genre_id INT NOT NULL, -- genre id for the link
         book_id INT NOT NULL, -- book id for the link
-        PRIMARY KEY (genre_id, book_id), -- composite key keeping track of relationships
+        UNIQUE KEY unique_genre_book (genre_id, book_id),
         FOREIGN KEY (genre_id) REFERENCES Genres(genre_id) -- gets genre_id from auto incremented attribute in Genres
             ON UPDATE CASCADE
             ON DELETE CASCADE, -- ensures that if the genre_id is updated or deleted, it is realized in this table, preventing orphaned genre/book relationships
@@ -101,8 +102,7 @@ BEGIN
     (1, 1),  -- Fantasy, Harry Potter
     (3, 1),  -- Young Adult, Harry Potter
     (2, 2),  -- Dystopian, Animal Farm
-    (3, 3),  -- Young Adult, The Lightning Thief
-    (1, 3);  -- Fantasy, The Lightning Thief
+    (3, 3);  -- Young Adult, The Lightning Thief
 
     SET FOREIGN_KEY_CHECKS=1; -- Re-enables foreign key checks after all tables are dropped
     COMMIT; -- commits all the changes made since AUTOCOMMIT was disabled

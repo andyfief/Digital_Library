@@ -2,7 +2,7 @@
 // Express
 const express = require('express');
 const app = express();
-const PORT = 45393;
+const PORT = 45367;
 
 // Database 
 const db = require('./db-connector');
@@ -18,7 +18,6 @@ app.use(express.static('public')); // Put your HTML files in a 'public' folder
 // Main page route - shows database reset confirmation
 app.get('/', async function (req, res) {
     try {
-        await db.query('CALL reset_database();');
         const rentalsQuery = 'SELECT * FROM Rentals;';
         const [rentals] = await db.query(rentalsQuery);
         
@@ -38,7 +37,7 @@ app.get('/api/rentals', async (req, res) => {
         const rentalsQuery = 'SELECT * FROM Rentals;';
         const [rentals] = await db.query(rentalsQuery);
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Rentals Data!</h1>";
         res.send(base + "<p>Rentals data:</p>" + JSON.stringify(rentals));
     } catch (error) {
         console.error("Error executing queries:", error);
@@ -51,7 +50,7 @@ app.get('/api/genres', async (req, res) => {
         const genresQuery = 'SELECT * FROM Genres ORDER BY genre_id;';
         const [genres] = await db.query(genresQuery);
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Genres Data</h1>";
         res.send(base + "<p>Genres data:</p>" + JSON.stringify(genres));
     } catch (error) {
         console.error("Error executing queries:", error);
@@ -65,7 +64,7 @@ app.get('/api/users', async (req, res) => {
         const usersQuery = 'SELECT * FROM Users;';
         const [users] = await db.query(usersQuery);
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Users Data</h1>";
         res.send(base + "<p>Users data:</p>" + JSON.stringify(users));
     } catch (error) {
         console.error("Error executing queries:", error);
@@ -78,7 +77,7 @@ app.get('/api/authors', async (req, res) => {
         const authorsQuery = 'SELECT * FROM Authors;';
         const [authors] = await db.query(authorsQuery);
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Users Data</h1>";
         res.send(base + "<p>Users data:</p>" + JSON.stringify(authors));
     } catch (error) {
         console.error("Error executing queries:", error);
@@ -95,7 +94,7 @@ app.get('/api/books', async (req, res) => {
         const [books] = await db.query(booksQuery);
         console.log('[API] Books query result:', books.length, 'books found');
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Books Data</h1>";
         res.send(base + "<p>Books data:</p>" + JSON.stringify(books)); // FIXED - now says "Books data"
     } catch (error) {
         console.error("[API] Error executing books query:", error);
@@ -108,7 +107,7 @@ app.get('/api/relationships', async (req, res) => {
         const relationshipsQuery = 'SELECT * FROM Genres_Has_Books;';
         const [relationships] = await db.query(relationshipsQuery);
         
-        const base = "<h1>Database Reset Complete!</h1>";
+        const base = "<h1>Relationships Data</h1>";
         res.send(base + "<p>Users data:</p>" + JSON.stringify(relationships));
     } catch (error) {
         console.error("Error executing queries:", error);
@@ -327,6 +326,73 @@ app.delete('/api/authors/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting author:', error);
         res.status(500).json({ error: 'Failed to delete author' });
+    }
+});
+
+// POST new relationship using stored procedure
+app.post('/api/relationships', async (req, res) => {
+    try {
+        console.log('[API] POST /api/relationships called with data:', req.body);
+        const { genre_id, book_id } = req.body;
+        
+        // Call the add_relationship stored procedure
+        const [result] = await db.query('CALL add_relationship(?, ?)', [genre_id, book_id]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Relationship created successfully', relationship_id: result[0].relationship_id });
+        }
+    } catch (error) {
+        console.error('Error creating relationship:', error);
+        res.status(500).json({ error: 'Failed to create relationship' });
+    }
+});
+
+// Update relationship using stored procedure
+app.put('/api/relationships/:id', async (req, res) => {
+    try {
+        const relationshipId = req.params.id;
+        const { genre_id, book_id } = req.body;
+
+        console.log('[API] PUT /api/relationships/' + relationshipId + ' called with data:', req.body);
+        console.log('[API] Calling update_relationship stored procedure with:', [relationshipId, genre_id, book_id]);
+
+        // Call the update_relationship stored procedure
+        const [result] = await db.query('CALL update_relationship(?, ?, ?)', [relationshipId, genre_id, book_id]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Relationship updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating relationship:', error);
+        res.status(500).json({ error: 'Failed to update relationship' });
+    }
+});
+
+// DELETE relationship using stored procedure
+app.delete('/api/relationships/:id', async (req, res) => {
+    try {
+        const relationshipId = req.params.id;
+        
+        // Call the delete_relationship stored procedure
+        const [result] = await db.query('CALL delete_relationship(?)', [relationshipId]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Relationship deleted successfully' });
+        }
+    } catch (error) {
+        console.error('Error deleting relationship:', error);
+        res.status(500).json({ error: 'Failed to delete relationship' });
     }
 });
 

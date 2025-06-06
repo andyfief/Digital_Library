@@ -414,27 +414,43 @@
         async function createBook(formData) {
             console.log('[CREATE] createBook called with data:', formData);
             try {
-                console.log('[CREATE] Sending POST request to /api/books');
-                const response = await fetch('/api/books', {
+                // First create the book (without genres)
+                const bookResponse = await fetch('/api/books', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: formData.title,
+                        author_id: formData.author_id,
+                        publication_date: formData.publication_date,
+                        description: formData.description,
+                        total_qty: formData.total_qty
+                    })
                 });
                 
-                console.log('[CREATE] Response status:', response.status);
-                const result = await response.json();
-                console.log('[CREATE] Response data:', result);
+                const bookResult = await bookResponse.json();
                 
-                if (response.ok) {
-                    console.log('[CREATE] Book created successfully:', result.message);
-                    showMessage(result.message || 'Book created successfully', 'success');
+                if (bookResponse.ok && formData.genres && formData.genres.length > 0) {
+                    // Then add genre relationships
+                    const bookId = bookResult.book_id;
+                    
+                    for (const genreId of formData.genres) {
+                        await fetch('/api/relationships', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                genre_id: parseInt(genreId),
+                                book_id: bookId
+                            })
+                        });
+                    }
+                }
+                
+                if (bookResponse.ok) {
+                    showMessage('Book and genres created successfully', 'success');
                     document.getElementById('addBookForm').reset();
-                    loadBooks(); // Reload the table
+                    loadBooks();
                 } else {
-                    console.error('[CREATE] Error creating book:', result.error);
-                    showMessage(result.error || 'Error creating book', 'error');
+                    showMessage(bookResult.error || 'Error creating book', 'error');
                 }
             } catch (error) {
                 console.error('[CREATE] Error creating book:', error);
@@ -479,19 +495,21 @@
         }
 
         document.getElementById('addBookForm').addEventListener('submit', function(e) {
-            console.log('[FORM] Add book form submitted');
             e.preventDefault();
             
             const formData = new FormData(this);
+            const genreSelect = document.getElementById('genres');
+            const selectedGenres = Array.from(genreSelect.selectedOptions).map(option => option.value);
+            
             const bookData = {
                 title: formData.get('title'),
                 author_id: parseInt(formData.get('author_id')),
                 publication_date: formData.get('publication_date'),
                 description: formData.get('description') || null,
-                total_qty: parseInt(formData.get('total_qty'))
+                total_qty: parseInt(formData.get('total_qty')),
+                genres: selectedGenres  // Add this line
             };
             
-            console.log('[FORM] Parsed add book data:', bookData);
             createBook(bookData);
         });
 

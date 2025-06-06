@@ -302,4 +302,129 @@ BEGIN
     
 END//
 
+DROP PROCEDURE IF EXISTS delete_relationship//
+
+CREATE PROCEDURE delete_relationship(IN p_relationship_id INT)
+BEGIN
+    -- Declare variable for error handling
+    DECLARE relationship_exists INT DEFAULT 0;
+    
+    -- Check if the relationship exists before attempting to delete
+    SELECT COUNT(*) INTO relationship_exists 
+    FROM Genres_Has_Books 
+    WHERE relationship_id = p_relationship_id;
+    
+    -- Only delete if the relationship exists
+    IF relationship_exists > 0 THEN
+        DELETE FROM Genres_Has_Books 
+        WHERE relationship_id = p_relationship_id;
+        
+        SELECT CONCAT('Relationship ID ', p_relationship_id, ' has been deleted.') AS message;
+    ELSE
+        SELECT CONCAT('Error: Relationship ID ', p_relationship_id, ' not found.') AS error_message;
+    END IF;
+    
+END//
+
+DROP PROCEDURE IF EXISTS add_relationship//
+
+CREATE PROCEDURE add_relationship(
+    IN p_genre_id INT,
+    IN p_book_id INT
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE genre_exists INT DEFAULT 0;
+    DECLARE book_exists INT DEFAULT 0;
+    DECLARE relationship_exists INT DEFAULT 0;
+    DECLARE new_relationship_id INT DEFAULT 0;
+    
+    -- Check if the genre exists
+    SELECT COUNT(*) INTO genre_exists 
+    FROM Genres 
+    WHERE genre_id = p_genre_id;
+    
+    -- Check if the book exists
+    SELECT COUNT(*) INTO book_exists 
+    FROM Books 
+    WHERE book_id = p_book_id;
+    
+    -- Check if the relationship already exists
+    SELECT COUNT(*) INTO relationship_exists 
+    FROM Genres_Has_Books 
+    WHERE genre_id = p_genre_id AND book_id = p_book_id;
+    
+    -- Only add relationship if both genre and book exist and relationship doesn't already exist
+    IF genre_exists = 0 THEN
+        SELECT CONCAT('Error: Genre ID ', p_genre_id, ' not found.') AS error_message;
+    ELSEIF book_exists = 0 THEN
+        SELECT CONCAT('Error: Book ID ', p_book_id, ' not found.') AS error_message;
+    ELSEIF relationship_exists > 0 THEN
+        SELECT CONCAT('Error: Relationship between Genre ID ', p_genre_id, ' and Book ID ', p_book_id, ' already exists.') AS error_message;
+    ELSE
+        INSERT INTO Genres_Has_Books (genre_id, book_id)
+        VALUES (p_genre_id, p_book_id);
+        
+        SET new_relationship_id = LAST_INSERT_ID();
+        
+        SELECT CONCAT('Relationship ID ', new_relationship_id, ' has been created successfully.') AS message,
+               new_relationship_id AS relationship_id;
+    END IF;
+    
+END//
+
+DROP PROCEDURE IF EXISTS update_relationship//
+
+CREATE PROCEDURE update_relationship(
+    IN p_relationship_id INT,
+    IN p_new_genre_id INT,
+    IN p_new_book_id INT
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE relationship_exists INT DEFAULT 0;
+    DECLARE genre_exists INT DEFAULT 0;
+    DECLARE book_exists INT DEFAULT 0;
+    DECLARE duplicate_exists INT DEFAULT 0;
+    
+    -- Check if the relationship exists
+    SELECT COUNT(*) INTO relationship_exists 
+    FROM Genres_Has_Books 
+    WHERE relationship_id = p_relationship_id;
+    
+    -- Check if the new genre exists
+    SELECT COUNT(*) INTO genre_exists 
+    FROM Genres 
+    WHERE genre_id = p_new_genre_id;
+    
+    -- Check if the new book exists
+    SELECT COUNT(*) INTO book_exists 
+    FROM Books 
+    WHERE book_id = p_new_book_id;
+    
+    -- Check if the new combination would create a duplicate (excluding current relationship)
+    SELECT COUNT(*) INTO duplicate_exists 
+    FROM Genres_Has_Books 
+    WHERE genre_id = p_new_genre_id AND book_id = p_new_book_id AND relationship_id != p_relationship_id;
+    
+    -- Only update relationship if everything is valid
+    IF relationship_exists = 0 THEN
+        SELECT CONCAT('Error: Relationship ID ', p_relationship_id, ' not found.') AS error_message;
+    ELSEIF genre_exists = 0 THEN
+        SELECT CONCAT('Error: Genre ID ', p_new_genre_id, ' not found.') AS error_message;
+    ELSEIF book_exists = 0 THEN
+        SELECT CONCAT('Error: Book ID ', p_new_book_id, ' not found.') AS error_message;
+    ELSEIF duplicate_exists > 0 THEN
+        SELECT CONCAT('Error: Relationship between Genre ID ', p_new_genre_id, ' and Book ID ', p_new_book_id, ' already exists.') AS error_message;
+    ELSE
+        UPDATE Genres_Has_Books
+        SET genre_id = p_new_genre_id,
+            book_id = p_new_book_id
+        WHERE relationship_id = p_relationship_id;
+        
+        SELECT CONCAT('Relationship ID ', p_relationship_id, ' has been updated successfully.') AS message;
+    END IF;
+    
+END//
+
 DELIMITER ;
