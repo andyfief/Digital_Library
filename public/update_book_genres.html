@@ -162,8 +162,8 @@
             <thead>
                 <tr>
                     <th>Relationship ID</th>
-                    <th>Genre ID</th>
-                    <th>Book ID</th>
+                    <th>Book Title</th>
+                    <th>Genre Name</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -188,6 +188,18 @@
             setTimeout(() => {
                 messageDiv.innerHTML = '';
             }, 5000);
+        }
+
+        // Helper function to get book title by ID
+        function getBookTitle(bookId) {
+            const book = allBooks.find(b => b.book_id == bookId);
+            return book ? book.title : `Book ${bookId}`;
+        }
+
+        // Helper function to get genre title by ID
+        function getGenreTitle(genreId) {
+            const genre = allGenres.find(g => g.genre_id == genreId);
+            return genre ? genre.title : `Genre ${genreId}`;
         }
 
         async function loadBooks() {
@@ -361,10 +373,14 @@
                 console.log(`[TABLE] Processing relationship ${index + 1}:`, relationship);
                 const row = document.createElement('tr');
                 
+                // Get the book and genre names using helper functions
+                const bookTitle = getBookTitle(relationship.book_id);
+                const genreTitle = getGenreTitle(relationship.genre_id);
+                
                 row.innerHTML = `
                     <td>${relationship.relationship_id || 'N/A'}</td>
-                    <td>${relationship.genre_id || 'N/A'}</td>
-                    <td>${relationship.book_id || 'N/A'}</td>
+                    <td>${bookTitle}</td>
+                    <td>${genreTitle}</td>
                     <td class="actions">
                         <button class="delete-btn" onclick="deleteRelationship(${relationship.relationship_id})">Delete</button>
                     </td>
@@ -390,12 +406,9 @@
                 const option = document.createElement('option');
                 option.value = relationship.relationship_id;
                 
-                // Find book and genre names for better display
-                const book = allBooks.find(b => b.book_id == relationship.book_id);
-                const genre = allGenres.find(g => g.genre_id == relationship.genre_id);
-                
-                const bookTitle = book ? book.title : `Book ${relationship.book_id}`;
-                const genreTitle = genre ? genre.title : `Genre ${relationship.genre_id}`;
+                // Use helper functions to get book and genre names
+                const bookTitle = getBookTitle(relationship.book_id);
+                const genreTitle = getGenreTitle(relationship.genre_id);
                 
                 option.textContent = `${relationship.relationship_id} - ${bookTitle} (${genreTitle})`;
                 select.appendChild(option);
