@@ -67,11 +67,26 @@
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Book Genres</h1>
+        <h1>Book Genres Management</h1>
         <div class="nav-links">
             <a href="index.html">Home</a> |
             <a href="books.html">Books</a> |
@@ -83,16 +98,16 @@
         </div>
     </header>
 
+    <div id="message"></div>
+
     <section>
         <h2>Add Book-Genre Relationship</h2>
-        <form id="addBookGenreForm">
+        <form id="addRelationshipForm">
             <div>
                 <label for="book">Select Book:</label>
                 <select id="book" name="book_id" required>
                     <option value="">Choose a book</option>
-                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">Animal Farm</option>
-                    <option value="3">The Lightning Thief</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -100,9 +115,7 @@
                 <label for="genre">Select Genre:</label>
                 <select id="genre" name="genre_id" required>
                     <option value="">Choose a genre</option>
-                    <option value="1">Fantasy</option>
-                    <option value="2">Dystopian</option>
-                    <option value="3">Young Adult</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -110,18 +123,14 @@
         </form>
     </section>
 
-    <section class="edit-form">
+    <section>
         <h2>Edit Book-Genre Relationship</h2>
-        <form id="editBookGenreForm">
+        <form id="editRelationshipForm">
             <div>
                 <label for="edit_relationship_id">Select Relationship to Edit:</label>
                 <select id="edit_relationship_id" name="relationship_id" onchange="loadRelationshipData()" required>
                     <option value="">Select Relationship to Edit</option>
-                    <option value="1-1">Harry Potter - Fantasy</option>
-                    <option value="1-3">Harry Potter - Young Adult</option>
-                    <option value="2-2">Animal Farm - Dystopian</option>
-                    <option value="3-1">Lightning Thief - Fantasy</option>
-                    <option value="3-3">Lightning Thief - Young Adult</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -129,9 +138,7 @@
                 <label for="edit_book">Book:</label>
                 <select id="edit_book" name="book_id" required>
                     <option value="">Select Book</option>
-                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">Animal Farm</option>
-                    <option value="3">The Lightning Thief</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -139,13 +146,12 @@
                 <label for="edit_genre">Genre:</label>
                 <select id="edit_genre" name="genre_id" required>
                     <option value="">Select Genre</option>
-                    <option value="1">Fantasy</option>
-                    <option value="2">Dystopian</option>
-                    <option value="3">Young Adult</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
             <button type="submit">Update Relationship</button>
+            <button type="button" onclick="clearEditForm()">Clear Form</button>
         </form>
     </section>
 
@@ -155,8 +161,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Book ID</th>
+                    <th>Relationship ID</th>
                     <th>Genre ID</th>
+                    <th>Book ID</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -167,12 +174,74 @@
     </section>
 
     <script>
-        async function loadRelationships() {
-            console.log('loadRelationships() called');
+        console.log('[INIT] Relationships script loaded');
+        
+        // Store data globally for easy access
+        let allRelationships = [];
+        let allBooks = [];
+        let allGenres = [];
+
+        function showMessage(message, type = 'success') {
+            console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function loadBooks() {
+            console.log('[LOAD] Loading books for dropdowns...');
             try {
-                console.log('Fetching from /api/relationships...');
+                const response = await fetch('/api/books');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const htmlResponse = await response.text();
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in books response');
+                }
+                
+                allBooks = JSON.parse(jsonMatch[0]);
+                console.log('[LOAD] Loaded books:', allBooks.length);
+                populateBookDropdowns();
+            } catch (error) {
+                console.error('[LOAD] Error loading books:', error);
+                showMessage('Error loading books: ' + error.message, 'error');
+            }
+        }
+
+        async function loadGenres() {
+            console.log('[LOAD] Loading genres for dropdowns...');
+            try {
+                const response = await fetch('/api/genres');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const htmlResponse = await response.text();
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in genres response');
+                }
+                
+                allGenres = JSON.parse(jsonMatch[0]);
+                console.log('[LOAD] Loaded genres:', allGenres.length);
+                populateGenreDropdowns();
+            } catch (error) {
+                console.error('[LOAD] Error loading genres:', error);
+                showMessage('Error loading genres: ' + error.message, 'error');
+            }
+        }
+
+        async function loadRelationships() {
+            console.log('[LOAD] loadRelationships() called');
+            try {
+                console.log('[LOAD] Fetching from /api/relationships...');
                 const response = await fetch('/api/relationships');
-                console.log('Response status:', response.status);
+                console.log('[LOAD] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -180,10 +249,9 @@
                 
                 // Get the HTML response
                 const htmlResponse = await response.text();
-                console.log('Raw response:', htmlResponse);
+                console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
                 // Extract JSON from the HTML response
-                // Your response format: "<h1>Database Reset Complete!</h1><p>Rentals data:</p>[{...}]"
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
                 if (!jsonMatch) {
@@ -191,60 +259,354 @@
                 }
                 
                 const jsonString = jsonMatch[0];
-                console.log('Extracted JSON string:', jsonString);
+                console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const relationships = JSON.parse(jsonString);
-                console.log('Parsed relationships data:', relationships);
+                console.log('[LOAD] Parsed relationships data:', relationships);
                 
-                // Populate the table
-                const tbody = document.getElementById('relationshipsTableBody');
-                if (!tbody) {
-                    console.error('Could not find relationshipsTableBody');
-                    return;
-                }
+                // Store relationships globally
+                allRelationships = relationships;
                 
-                tbody.innerHTML = '';
+                // Populate the table and edit dropdown
+                populateRelationshipsTable(relationships);
+                populateEditDropdown(relationships);
                 
-                if (relationships.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                                No relationships found
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Create table rows for each relationship
-                relationships.forEach((relationship, index) => {
-                    console.log(`Processing relationship ${index + 1}:`, relationship);
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${relationship.genre_id || 'N/A'}</td>
-                        <td>${relationship.book_id || 'N/A'}</td>
-                        <td class="actions">
-                            <button class="delete-btn" onclick="deleteRental(${relationship.relationship_id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`Successfully populated table with ${relationships.length} rentals`);
+                console.log(`[LOAD] Successfully loaded ${relationships.length} relationships`);
                 
             } catch (error) {
-                console.error('Error in loadrelationships:', error);
+                console.error('[LOAD] Error in loadRelationships:', error);
+                showMessage('Error loading relationships: ' + error.message, 'error');
             }
         }
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, ready to load rentals');
+
+        function populateBookDropdowns() {
+            console.log('[DROPDOWN] Populating book dropdowns');
+            
+            // Populate add form dropdown
+            const addSelect = document.getElementById('book');
+            if (addSelect) {
+                addSelect.innerHTML = '<option value="">Choose a book</option>';
+                allBooks.forEach(book => {
+                    const option = document.createElement('option');
+                    option.value = book.book_id;
+                    option.textContent = book.title;
+                    addSelect.appendChild(option);
+                });
+            }
+            
+            // Populate edit form dropdown
+            const editSelect = document.getElementById('edit_book');
+            if (editSelect) {
+                editSelect.innerHTML = '<option value="">Select Book</option>';
+                allBooks.forEach(book => {
+                    const option = document.createElement('option');
+                    option.value = book.book_id;
+                    option.textContent = book.title;
+                    editSelect.appendChild(option);
+                });
+            }
+        }
+
+        function populateGenreDropdowns() {
+            console.log('[DROPDOWN] Populating genre dropdowns');
+            
+            // Populate add form dropdown
+            const addSelect = document.getElementById('genre');
+            if (addSelect) {
+                addSelect.innerHTML = '<option value="">Choose a genre</option>';
+                allGenres.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre.genre_id;
+                    option.textContent = genre.title;
+                    addSelect.appendChild(option);
+                });
+            }
+            
+            // Populate edit form dropdown
+            const editSelect = document.getElementById('edit_genre');
+            if (editSelect) {
+                editSelect.innerHTML = '<option value="">Select Genre</option>';
+                allGenres.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre.genre_id;
+                    option.textContent = genre.title;
+                    editSelect.appendChild(option);
+                });
+            }
+        }
+
+        function populateRelationshipsTable(relationships) {
+            console.log('[TABLE] Populating relationships table with', relationships.length, 'relationships');
+            const tbody = document.getElementById('relationshipsTableBody');
+            if (!tbody) {
+                console.error('[TABLE] Could not find relationshipsTableBody');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (relationships.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+                            No relationships found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Create table rows for each relationship
+            relationships.forEach((relationship, index) => {
+                console.log(`[TABLE] Processing relationship ${index + 1}:`, relationship);
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${relationship.relationship_id || 'N/A'}</td>
+                    <td>${relationship.genre_id || 'N/A'}</td>
+                    <td>${relationship.book_id || 'N/A'}</td>
+                    <td class="actions">
+                        <button class="delete-btn" onclick="deleteRelationship(${relationship.relationship_id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log(`[TABLE] Successfully populated table with ${relationships.length} relationships`);
+        }
+
+        function populateEditDropdown(relationships) {
+            console.log('[DROPDOWN] Populating edit dropdown with', relationships.length, 'relationships');
+            const select = document.getElementById('edit_relationship_id');
+            if (!select) {
+                console.error('[DROPDOWN] Could not find edit_relationship_id select');
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Relationship to Edit</option>';
+            
+            relationships.forEach(relationship => {
+                const option = document.createElement('option');
+                option.value = relationship.relationship_id;
+                
+                // Find book and genre names for better display
+                const book = allBooks.find(b => b.book_id == relationship.book_id);
+                const genre = allGenres.find(g => g.genre_id == relationship.genre_id);
+                
+                const bookTitle = book ? book.title : `Book ${relationship.book_id}`;
+                const genreTitle = genre ? genre.title : `Genre ${relationship.genre_id}`;
+                
+                option.textContent = `${relationship.relationship_id} - ${bookTitle} (${genreTitle})`;
+                select.appendChild(option);
+            });
+            
+            console.log('[DROPDOWN] Successfully populated dropdown');
+        }
+
+        function loadRelationshipData() {
+            console.log('[EDIT] loadRelationshipData() called');
+            const select = document.getElementById('edit_relationship_id');
+            const relationshipId = select.value;
+            
+            console.log('[EDIT] Selected relationship ID:', relationshipId);
+            
+            if (!relationshipId) {
+                console.log('[EDIT] No relationship selected, clearing form');
+                clearEditForm();
+                return;
+            }
+            
+            // Find the relationship in our stored data
+            const relationship = allRelationships.find(r => r.relationship_id == relationshipId);
+            console.log('[EDIT] Found relationship data:', relationship);
+            
+            if (!relationship) {
+                console.error('[EDIT] Relationship not found in stored data');
+                showMessage('Relationship data not found', 'error');
+                return;
+            }
+            
+            // Populate the form fields
+            document.getElementById('edit_book').value = relationship.book_id || '';
+            document.getElementById('edit_genre').value = relationship.genre_id || '';
+            
+            console.log('[EDIT] Form populated with relationship data');
+        }
+
+        async function deleteRelationship(relationshipId) {
+            console.log('[DELETE] deleteRelationship called for ID:', relationshipId);
+            if (confirm(`Are you sure you want to delete relationship ${relationshipId}?`)) {
+                try {
+                    console.log('[DELETE] Sending DELETE request for relationship:', relationshipId);
+                    const response = await fetch(`/api/relationships/${relationshipId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    console.log('[DELETE] Response status:', response.status);
+                    const result = await response.json();
+                    console.log('[DELETE] Response data:', result);
+                    
+                    if (response.ok) {
+                        console.log('[DELETE] Relationship deleted successfully');
+                        showMessage(result.message || 'Relationship deleted successfully', 'success');
+                        loadRelationships(); // Reload the table
+                    } else {
+                        console.error('[DELETE] Error deleting relationship:', result.error);
+                        showMessage(result.error || 'Error deleting relationship', 'error');
+                    }
+                } catch (error) {
+                    console.error('[DELETE] Error deleting relationship:', error);
+                    showMessage('Error deleting relationship: ' + error.message, 'error');
+                }
+            }
+        }
+
+        async function createRelationship(formData) {
+            console.log('[CREATE] createRelationship called with data:', formData);
+            try {
+                console.log('[CREATE] Sending POST request to /api/relationships');
+                const response = await fetch('/api/relationships', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[CREATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[CREATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[CREATE] Relationship created successfully:', result.message);
+                    showMessage(result.message || 'Relationship created successfully', 'success');
+                    document.getElementById('addRelationshipForm').reset();
+                    loadRelationships(); // Reload the table
+                } else {
+                    console.error('[CREATE] Error creating relationship:', result.error);
+                    showMessage(result.error || 'Error creating relationship', 'error');
+                }
+            } catch (error) {
+                console.error('[CREATE] Error creating relationship:', error);
+                showMessage('Error creating relationship: ' + error.message, 'error');
+            }
+        }
+
+        async function updateRelationship(relationshipId, formData) {
+            console.log('[UPDATE] updateRelationship called for ID:', relationshipId, 'with data:', formData);
+            try {
+                console.log('[UPDATE] Sending PUT request to /api/relationships/' + relationshipId);
+                const response = await fetch(`/api/relationships/${relationshipId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[UPDATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[UPDATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[UPDATE] Relationship updated successfully:', result.message);
+                    showMessage(result.message || 'Relationship updated successfully', 'success');
+                    clearEditForm();
+                    loadRelationships(); // Reload the table
+                } else {
+                    console.error('[UPDATE] Error updating relationship:', result.error);
+                    showMessage(result.error || 'Error updating relationship', 'error');
+                }
+            } catch (error) {
+                console.error('[UPDATE] Error updating relationship:', error);
+                showMessage('Error updating relationship: ' + error.message, 'error');
+            }
+        }
+
+        function clearEditForm() {
+            console.log('[EDIT] Clearing edit form');
+            document.getElementById('editRelationshipForm').reset();
+        }
+
+        document.getElementById('addRelationshipForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Add relationship form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const relationshipData = {
+                genre_id: parseInt(formData.get('genre_id')),
+                book_id: parseInt(formData.get('book_id'))
+            };
+            
+            console.log('[FORM] Parsed add relationship data:', relationshipData);
+            createRelationship(relationshipData);
+        });
+
+        document.getElementById('editRelationshipForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Edit relationship form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const relationshipId = formData.get('relationship_id');
+            
+            console.log('[FORM] Selected relationship ID for edit:', relationshipId);
+            
+            if (!relationshipId) {
+                console.error('[FORM] No relationship selected for edit');
+                showMessage('Please select a relationship to edit', 'error');
+                return;
+            }
+            
+            const relationshipData = {
+                genre_id: parseInt(formData.get('genre_id')),
+                book_id: parseInt(formData.get('book_id'))
+            };
+            
+            console.log('[FORM] Parsed edit relationship data:', relationshipData);
+            updateRelationship(relationshipId, relationshipData);
+        });
+
+       document.addEventListener('DOMContentLoaded', function() {
+        // added with Claude AI to help with refreshing relationships after adding a book.
+            console.log('[INIT] Page loaded, ready to load data');
+            
+            // Load all data needed for the page
+            Promise.all([loadBooks(), loadGenres()])
+                .then(() => {
+                    console.log('[INIT] Books and genres loaded, now loading relationships');
+                    loadRelationships();
+                })
+                .catch(error => {
+                    console.error('[INIT] Error loading initial data:', error);
+                    showMessage('Error loading page data: ' + error.message, 'error');
+                });
+        });
+
+        // Add page visibility listener to refresh data when returning to the page
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                console.log('[VISIBILITY] Page became visible, refreshing data');
+                // Reload all data when page becomes visible again
+                Promise.all([loadBooks(), loadGenres()])
+                    .then(() => {
+                        loadRelationships();
+                    })
+                    .catch(error => {
+                        console.error('[VISIBILITY] Error refreshing data:', error);
+                    });
+            }
+        });
+
+        // Also add a window focus listener as a fallback
+        window.addEventListener('focus', function() {
+            console.log('[FOCUS] Window focused, refreshing relationships');
             loadRelationships();
         });
     </script>
 
     <footer>
-        <p>© 2025 Library Management System</p>
+        <p>Andrew Fief, Ekansh Arora © 2025 Library Management System</p>
     </footer>
 </body>
 </html>
