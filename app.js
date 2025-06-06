@@ -533,6 +533,77 @@ app.get('/api/debug/connection', async (req, res) => {
     }
 });
 
+// POST new genre using stored procedure
+app.post('/api/genres', async (req, res) => {
+    try {
+        console.log('[API] POST /api/genres called with data:', req.body);
+        const { title } = req.body;
+        
+        // Call the add_genre stored procedure
+        const [result] = await db.query('CALL add_genre(?)', [title]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ 
+                success: true, 
+                message: result[0].message || 'Genre created successfully', 
+                genre_id: result[0].genre_id 
+            });
+        }
+    } catch (error) {
+        console.error('Error creating genre:', error);
+        res.status(500).json({ error: 'Failed to create genre' });
+    }
+});
+
+// Update genre using stored procedure
+app.put('/api/genres/:id', async (req, res) => {
+    try {
+        const genreId = req.params.id;
+        const { title } = req.body;
+
+        console.log('[API] PUT /api/genres/' + genreId + ' called with data:', req.body);
+        console.log('[API] Calling update_genre stored procedure with:', [genreId, title]);
+
+        // Call the update_genre stored procedure
+        const [result] = await db.query('CALL update_genre(?, ?)', [genreId, title]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Genre updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating genre:', error);
+        res.status(500).json({ error: 'Failed to update genre' });
+    }
+});
+
+// DELETE genre using stored procedure
+app.delete('/api/genres/:id', async (req, res) => {
+    try {
+        const genreId = req.params.id;
+        
+        // Call the delete_genre stored procedure
+        const [result] = await db.query('CALL delete_genre(?)', [genreId]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Genre deleted successfully' });
+        }
+    } catch (error) {
+        console.error('Error deleting genre:', error);
+        res.status(500).json({ error: 'Failed to delete genre' });
+    }
+});
+
 /*     LISTENER */
 app.listen(PORT, function(){
     console.log('Express started on http://localhost:' + PORT + '; press Ctrl-C to terminate.')

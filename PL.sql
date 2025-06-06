@@ -581,4 +581,97 @@ BEGIN
     
 END//
 
+-- DELETE genre using stored procedure
+DROP PROCEDURE IF EXISTS delete_genre//
+
+CREATE PROCEDURE delete_genre(IN p_genre_id INT)
+BEGIN
+    -- Declare variable for error handling
+    DECLARE genre_exists INT DEFAULT 0;
+    
+    -- Check if the genre exists before attempting to delete
+    SELECT COUNT(*) INTO genre_exists 
+    FROM Genres 
+    WHERE genre_id = p_genre_id;
+    
+    -- Only delete if the genre exists
+    IF genre_exists > 0 THEN
+        DELETE FROM Genres 
+        WHERE genre_id = p_genre_id;
+        
+        SELECT CONCAT('Genre ID ', p_genre_id, ' has been deleted.') AS message;
+    ELSE
+        SELECT CONCAT('Error: Genre ID ', p_genre_id, ' not found.') AS error_message;
+    END IF;
+    
+END//
+
+-- ADD genre using stored procedure
+DROP PROCEDURE IF EXISTS add_genre//
+
+CREATE PROCEDURE add_genre(
+    IN p_title VARCHAR(100)
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE title_exists INT DEFAULT 0;
+    DECLARE new_genre_id INT DEFAULT 0;
+    
+    -- Check if the title already exists (genres have UNIQUE constraint on title)
+    SELECT COUNT(*) INTO title_exists 
+    FROM Genres 
+    WHERE title = p_title;
+    
+    -- Only add genre if title is unique
+    IF title_exists > 0 THEN
+        SELECT CONCAT('Error: Genre title "', p_title, '" already exists.') AS error_message;
+    ELSE
+        INSERT INTO Genres (title)
+        VALUES (p_title);
+        
+        SET new_genre_id = LAST_INSERT_ID();
+        
+        SELECT CONCAT('Genre ID ', new_genre_id, ' has been created successfully.') AS message,
+               new_genre_id AS genre_id;
+    END IF;
+    
+END//
+
+-- UPDATE genre using stored procedure
+DROP PROCEDURE IF EXISTS update_genre//
+
+CREATE PROCEDURE update_genre(
+    IN p_genre_id INT,
+    IN p_new_title VARCHAR(100)
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE genre_exists INT DEFAULT 0;
+    DECLARE title_exists INT DEFAULT 0;
+    
+    -- Check if the genre exists
+    SELECT COUNT(*) INTO genre_exists 
+    FROM Genres 
+    WHERE genre_id = p_genre_id;
+    
+    -- Check if the new title already exists (excluding current genre)
+    SELECT COUNT(*) INTO title_exists 
+    FROM Genres 
+    WHERE title = p_new_title AND genre_id != p_genre_id;
+    
+    -- Only update genre if genre exists and new title is unique
+    IF genre_exists = 0 THEN
+        SELECT CONCAT('Error: Genre ID ', p_genre_id, ' not found.') AS error_message;
+    ELSEIF title_exists > 0 THEN
+        SELECT CONCAT('Error: Genre title "', p_new_title, '" already exists.') AS error_message;
+    ELSE
+        UPDATE Genres
+        SET title = p_new_title
+        WHERE genre_id = p_genre_id;
+        
+        SELECT CONCAT('Genre ID ', p_genre_id, ' has been updated successfully.') AS message;
+    END IF;
+    
+END//
+
 DELIMITER ;

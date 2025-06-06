@@ -38,7 +38,7 @@
             display: block;
             margin-top: 10px;
         }
-        input {
+        input, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -70,6 +70,21 @@
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -81,10 +96,12 @@
             <a href="authors.html">Authors</a> |
             <a href="genres.html">Genres</a> |
             <a href="users.html">Users</a> |
-            <a href="rentals.html">Rentals</a>
+            <a href="rentals.html">Rentals</a> |
             <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
+
+    <div id="message"></div>
 
     <section>
         <h2>Add New Genre</h2>
@@ -105,9 +122,7 @@
                 <label for="edit_genre_id">Genre ID:</label>
                 <select id="edit_genre_id" name="genre_id" onchange="loadGenreData()" required>
                     <option value="">Select Genre to Edit</option>
-                    <option value="1">1 - Fantasy</option>
-                    <option value="2">2 - Dystopian</option>
-                    <option value="3">3 - Young Adult</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -123,11 +138,13 @@
 
     <section>
         <h2>Existing Genres</h2>
+        <p>This table shows all genres. Data populated with: <code>SELECT * FROM Genres;</code></p>
         <table>
             <thead>
                 <tr>
-                    <th>Genre ID</th>
-                    <th>title</th>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="genresTableBody">
@@ -137,12 +154,26 @@
     </section>
 
     <script>
+        console.log('[INIT] Genres script loaded');
+        
+        // Store genres data globally for easy access
+        let allGenres = [];
+
+        function showMessage(message, type = 'success') {
+            console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
         async function loadGenres() {
-            console.log('loadGenres() called');
+            console.log('[LOAD] loadGenres() called');
             try {
-                console.log('Fetching from /api/genres...');
+                console.log('[LOAD] Fetching from /api/genres...');
                 const response = await fetch('/api/genres');
-                console.log('Response status:', response.status);
+                console.log('[LOAD] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -150,10 +181,9 @@
                 
                 // Get the HTML response
                 const htmlResponse = await response.text();
-                console.log('Raw response:', htmlResponse);
+                console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
                 // Extract JSON from the HTML response
-                // Your response format: "<h1>Database Reset Complete!</h1><p>genres data:</p>[{...}]"
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
                 if (!jsonMatch) {
@@ -161,55 +191,248 @@
                 }
                 
                 const jsonString = jsonMatch[0];
-                console.log('Extracted JSON string:', jsonString);
+                console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const genres = JSON.parse(jsonString);
-                console.log('Parsed genres data:', genres);
+                console.log('[LOAD] Parsed genres data:', genres);
                 
-                // Populate the table
-                const tbody = document.getElementById('genresTableBody');
-                if (!tbody) {
-                    console.error('Could not find genresTableBody');
-                    return;
-                }
+                // Store genres globally
+                allGenres = genres;
                 
-                tbody.innerHTML = '';
+                // Populate the table and edit dropdown
+                populateGenresTable(genres);
+                populateEditDropdown(genres);
                 
-                if (genres.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                                No genres found
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Create table rows for each rental
-                genres.forEach((genre, index) => {
-                    console.log(`Processing genre ${index + 1}:`, genre);
-                    const row = document.createElement('tr');
-
-                    row.innerHTML = `
-                        <td>${genre.genre_id || 'N/A'}</td>
-                        <td>${genre.title || 'N/A'}</td>
-                        <td class="actions">
-                            <button class="delete-btn" onclick="deletegenre(${genre.genre_id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`Successfully populated table with ${genres.length} genres`);
+                console.log(`[LOAD] Successfully loaded ${genres.length} genres`);
                 
             } catch (error) {
-                console.error('Error in loadgenres:', error);
+                console.error('[LOAD] Error in loadGenres:', error);
+                showMessage('Error loading genres: ' + error.message, 'error');
             }
         }
 
+        function populateGenresTable(genres) {
+            console.log('[TABLE] Populating genres table with', genres.length, 'genres');
+            const tbody = document.getElementById('genresTableBody');
+            if (!tbody) {
+                console.error('[TABLE] Could not find genresTableBody');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (genres.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="3" style="text-align: center; padding: 20px; color: #666;">
+                            No genres found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Create table rows for each genre
+            genres.forEach((genre, index) => {
+                console.log(`[TABLE] Processing genre ${index + 1}:`, genre);
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${genre.genre_id || 'N/A'}</td>
+                    <td>${genre.title || 'N/A'}</td>
+                    <td class="actions">
+                        <button class="delete-btn" onclick="deleteGenre(${genre.genre_id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log(`[TABLE] Successfully populated table with ${genres.length} genres`);
+        }
+
+        function populateEditDropdown(genres) {
+            console.log('[DROPDOWN] Populating edit dropdown with', genres.length, 'genres');
+            const select = document.getElementById('edit_genre_id');
+            if (!select) {
+                console.error('[DROPDOWN] Could not find edit_genre_id select');
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Genre to Edit</option>';
+            
+            genres.forEach(genre => {
+                const option = document.createElement('option');
+                option.value = genre.genre_id;
+                option.textContent = `${genre.genre_id} - ${genre.title}`;
+                select.appendChild(option);
+            });
+            
+            console.log('[DROPDOWN] Successfully populated dropdown');
+        }
+
+        function loadGenreData() {
+            console.log('[EDIT] loadGenreData() called');
+            const select = document.getElementById('edit_genre_id');
+            const genreId = select.value;
+            
+            console.log('[EDIT] Selected genre ID:', genreId);
+            
+            if (!genreId) {
+                console.log('[EDIT] No genre selected, clearing form');
+                clearEditForm();
+                return;
+            }
+            
+            // Find the genre in our stored data
+            const genre = allGenres.find(g => g.genre_id == genreId);
+            console.log('[EDIT] Found genre data:', genre);
+            
+            if (!genre) {
+                console.error('[EDIT] Genre not found in stored data');
+                showMessage('Genre data not found', 'error');
+                return;
+            }
+            
+            // Populate the form fields
+            document.getElementById('edit_title').value = genre.title || '';
+            
+            console.log('[EDIT] Form populated with genre data');
+        }
+
+        async function deleteGenre(genreId) {
+            console.log('[DELETE] deleteGenre called for ID:', genreId);
+            if (confirm(`Are you sure you want to delete genre ${genreId}?`)) {
+                try {
+                    console.log('[DELETE] Sending DELETE request for genre:', genreId);
+                    const response = await fetch(`/api/genres/${genreId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    console.log('[DELETE] Response status:', response.status);
+                    const result = await response.json();
+                    console.log('[DELETE] Response data:', result);
+                    
+                    if (response.ok) {
+                        console.log('[DELETE] Genre deleted successfully');
+                        showMessage(result.message || 'Genre deleted successfully', 'success');
+                        loadGenres(); // Reload the table
+                    } else {
+                        console.error('[DELETE] Error deleting genre:', result.error);
+                        showMessage(result.error || 'Error deleting genre', 'error');
+                    }
+                } catch (error) {
+                    console.error('[DELETE] Error deleting genre:', error);
+                    showMessage('Error deleting genre: ' + error.message, 'error');
+                }
+            }
+        }
+
+        async function createGenre(formData) {
+            console.log('[CREATE] createGenre called with data:', formData);
+            try {
+                console.log('[CREATE] Sending POST request to /api/genres');
+                const response = await fetch('/api/genres', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[CREATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[CREATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[CREATE] Genre created successfully:', result.message);
+                    showMessage(result.message || 'Genre created successfully', 'success');
+                    document.getElementById('addGenreForm').reset();
+                    loadGenres(); // Reload the table
+                } else {
+                    console.error('[CREATE] Error creating genre:', result.error);
+                    showMessage(result.error || 'Error creating genre', 'error');
+                }
+            } catch (error) {
+                console.error('[CREATE] Error creating genre:', error);
+                showMessage('Error creating genre: ' + error.message, 'error');
+            }
+        }
+
+        async function updateGenre(genreId, formData) {
+            console.log('[UPDATE] updateGenre called for ID:', genreId, 'with data:', formData);
+            try {
+                console.log('[UPDATE] Sending PUT request to /api/genres/' + genreId);
+                const response = await fetch(`/api/genres/${genreId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[UPDATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[UPDATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[UPDATE] Genre updated successfully:', result.message);
+                    showMessage(result.message || 'Genre updated successfully', 'success');
+                    clearEditForm();
+                    loadGenres(); // Reload the table
+                } else {
+                    console.error('[UPDATE] Error updating genre:', result.error);
+                    showMessage(result.error || 'Error updating genre', 'error');
+                }
+            } catch (error) {
+                console.error('[UPDATE] Error updating genre:', error);
+                showMessage('Error updating genre: ' + error.message, 'error');
+            }
+        }
+
+        function clearEditForm() {
+            console.log('[EDIT] Clearing edit form');
+            document.getElementById('editGenreForm').reset();
+        }
+
+        document.getElementById('addGenreForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Add genre form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const genreData = {
+                title: formData.get('title')
+            };
+            
+            console.log('[FORM] Parsed add genre data:', genreData);
+            createGenre(genreData);
+        });
+
+        document.getElementById('editGenreForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Edit genre form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const genreId = formData.get('genre_id');
+            
+            console.log('[FORM] Selected genre ID for edit:', genreId);
+            
+            if (!genreId) {
+                console.error('[FORM] No genre selected for edit');
+                showMessage('Please select a genre to edit', 'error');
+                return;
+            }
+            
+            const genreData = {
+                title: formData.get('title')
+            };
+            
+            console.log('[FORM] Parsed edit genre data:', genreData);
+            updateGenre(genreId, genreData);
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, ready to load rentals');
+            console.log('[INIT] Page loaded, ready to load genres');
             loadGenres();
         });
     </script>
