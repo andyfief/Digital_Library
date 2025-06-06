@@ -411,52 +411,77 @@
             }
         }
 
-        async function createBook(formData) {
-            console.log('[CREATE] createBook called with data:', formData);
-            try {
-                // First create the book (without genres)
-                const bookResponse = await fetch('/api/books', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        title: formData.title,
-                        author_id: formData.author_id,
-                        publication_date: formData.publication_date,
-                        description: formData.description,
-                        total_qty: formData.total_qty
-                    })
-                });
+    async function createBook(formData) {
+    // Claude AI helped with making relationship table update when this is called.
+        console.log('[CREATE] createBook called with data:', formData);
+        try {
+            // First create the book (without genres)
+            const bookResponse = await fetch('/api/books', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: formData.title,
+                    author_id: formData.author_id,
+                    publication_date: formData.publication_date,
+                    description: formData.description,
+                    total_qty: formData.total_qty
+                })
+            });
+            
+            const bookResult = await bookResponse.json();
+            console.log('[CREATE] Book creation result:', bookResult);
+            console.log('[CREATE] Book ID from result:', bookResult.book_id); // Debug the book_id
+            
+            if (bookResponse.ok) {
+                console.log('[CREATE] Book created successfully, now adding genres...');
                 
-                const bookResult = await bookResponse.json();
-                
-                if (bookResponse.ok && formData.genres && formData.genres.length > 0) {
-                    // Then add genre relationships
+                // Check if genres were selected and add relationships
+                if (formData.genres && formData.genres.length > 0 && bookResult.book_id) {
                     const bookId = bookResult.book_id;
+                    console.log('[CREATE] Adding genres for book ID:', bookId, 'Genres:', formData.genres);
                     
+                    // Add each genre relationship
                     for (const genreId of formData.genres) {
-                        await fetch('/api/relationships', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                genre_id: parseInt(genreId),
-                                book_id: bookId
-                            })
-                        });
+                        console.log('[CREATE] Adding genre relationship: genre', genreId, 'to book:', bookId);
+                        try {
+                            const relationshipResponse = await fetch('/api/relationships', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    genre_id: parseInt(genreId),
+                                    book_id: parseInt(bookId)  // Make sure this is an integer
+                                })
+                            });
+                            
+                            const relationshipResult = await relationshipResponse.json();
+                            console.log('[CREATE] Relationship result:', relationshipResult);
+                            
+                            if (!relationshipResponse.ok) {
+                                console.error('[CREATE] Error adding genre relationship:', relationshipResult.error);
+                                showMessage(`Warning: ${relationshipResult.error}`, 'error');
+                            }
+                        } catch (relationshipError) {
+                            console.error('[CREATE] Error adding genre relationship:', relationshipError);
+                            showMessage(`Warning: Error adding genre relationship: ${relationshipError.message}`, 'error');
+                        }
                     }
+                } else if (formData.genres && formData.genres.length > 0 && !bookResult.book_id) {
+                    console.error('[CREATE] No book_id returned from book creation!');
+                    showMessage('Warning: Book created but could not add genres - no book ID returned', 'error');
                 }
                 
-                if (bookResponse.ok) {
-                    showMessage('Book and genres created successfully', 'success');
-                    document.getElementById('addBookForm').reset();
-                    loadBooks();
-                } else {
-                    showMessage(bookResult.error || 'Error creating book', 'error');
-                }
-            } catch (error) {
-                console.error('[CREATE] Error creating book:', error);
-                showMessage('Error creating book: ' + error.message, 'error');
+                showMessage('Book created successfully' + (formData.genres && formData.genres.length > 0 ? ' with genres' : ''), 'success');
+                document.getElementById('addBookForm').reset();
+                loadBooks();
+            } else {
+                console.error('[CREATE] Error creating book:', bookResult.error);
+                showMessage(bookResult.error || 'Error creating book', 'error');
             }
+        } catch (error) {
+            console.error('[CREATE] Error creating book:', error);
+            showMessage('Error creating book: ' + error.message, 'error');
         }
+    }
 
         async function updateBook(bookId, formData) {
             console.log('[UPDATE] updateBook called for ID:', bookId, 'with data:', formData);
@@ -495,11 +520,16 @@
         }
 
         document.getElementById('addBookForm').addEventListener('submit', function(e) {
+            //Claude AI again for updating relationship table
+            console.log('[FORM] Add book form submitted');
             e.preventDefault();
             
             const formData = new FormData(this);
             const genreSelect = document.getElementById('genres');
+            
+            // Extract selected genres correctly
             const selectedGenres = Array.from(genreSelect.selectedOptions).map(option => option.value);
+            console.log('[FORM] Selected genres:', selectedGenres);
             
             const bookData = {
                 title: formData.get('title'),
@@ -507,9 +537,10 @@
                 publication_date: formData.get('publication_date'),
                 description: formData.get('description') || null,
                 total_qty: parseInt(formData.get('total_qty')),
-                genres: selectedGenres  // Add this line
+                genres: selectedGenres  // This should now work correctly
             };
             
+            console.log('[FORM] Final book data:', bookData);
             createBook(bookData);
         });
 

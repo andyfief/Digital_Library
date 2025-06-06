@@ -184,8 +184,53 @@ app.put('/api/rentals/:id', async (req, res) => {
     }
 });
 
+app.post('/api/books', async (req, res) => {
+    try {
+        console.log('[API] POST /api/books called with data:', req.body);
+        const { title, author_id, publication_date, description, total_qty } = req.body;
+        
+        // Call the add_book stored procedure
+        const [result] = await db.query('CALL add_book(?, ?, ?, ?, ?)', 
+            [title, author_id, publication_date, description, total_qty]);
+        
+        console.log('[API] Stored procedure result structure:');
+        console.log('- result:', result);
+        console.log('- result[0]:', result[0]);
+        console.log('- result[0][0]:', result[0][0]); // This should show the actual object
+        
+        // The result should be in result[0] (first row of first result set)
+        const procedureResult = result[0][0];          
+        console.log('[API] Procedure result data:', procedureResult);
+        console.log('[API] Available keys:', Object.keys(procedureResult));
+        
+        // Check if the procedure returned an error message
+        if (procedureResult && procedureResult.error_message) {
+            console.log('[API] Procedure returned error:', procedureResult.error_message);
+            res.status(400).json({ error: procedureResult.error_message });
+        } else {
+            // Extract the book_id and message from the result
+            const bookId = procedureResult.book_id;
+            const message = procedureResult.message;
+            
+            console.log('[API] Extracted book ID:', bookId);
+            console.log('[API] Extracted message:', message);
+            
+            res.json({ 
+                success: true, 
+                message: message || 'Book created successfully', 
+                book_id: bookId
+            });
+        }
+    } catch (error) {
+        console.error('[API] Error creating book:', error);
+        res.status(500).json({ error: 'Failed to create book', details: error.message });
+    }
+});
+
+/*
 // POST new book using stored procedure
 app.post('/api/books', async (req, res) => {
+    // Claude AI helps add debugging to this, attempting to get M:M table to reflect new books.
     try {
         console.log('[API] POST /api/books called with data:', req.body);
         const { title, author_id, publication_date, description, total_qty } = req.body;
@@ -195,16 +240,24 @@ app.post('/api/books', async (req, res) => {
         
         // Check if the procedure returned an error message
         if (result[0] && result[0].error_message) {
+            console.log('[API] Procedure returned error:', result[0].error_message);
             res.status(400).json({ error: result[0].error_message });
         } else {
-            res.json({ success: true, message: result[0].message || 'Book created successfully', book_id: result[0].book_id });
+            const bookId = result[0].book_id;
+            console.log('[API] Extracted book ID:', bookId);
+            
+            res.json({ 
+                success: true, 
+                message: result[0].message || 'Book created successfully', 
+                book_id: bookId 
+            });
         }
     } catch (error) {
         console.error('Error creating book:', error);
-        res.status(500).json({ error: 'Failed to create book' });
+        res.status(500).json({ error: 'Failed to create book', details: error.message });
     }
 });
-
+*/
 // Update book using stored procedure
 app.put('/api/books/:id', async (req, res) => {
 
@@ -393,6 +446,50 @@ app.delete('/api/relationships/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting relationship:', error);
         res.status(500).json({ error: 'Failed to delete relationship' });
+    }
+});
+
+
+// CLAUDE AI Added routes to debug database connection issues
+app.get('/api/debug/connection', async (req, res) => {
+    try {
+        console.log('[DEBUG] Checking database connection...');
+        
+        // Check current database and connection info
+        const [dbInfo] = await db.query(`
+            SELECT 
+                DATABASE() as current_db,
+                CONNECTION_ID() as connection_id,
+                USER() as user_info,
+                @@autocommit as autocommit_status,
+                @@session.autocommit as session_autocommit
+        `);
+        
+        // Count records in each table
+        const [counts] = await db.query(`
+            SELECT 
+                (SELECT COUNT(*) FROM Books) as books_count,
+                (SELECT COUNT(*) FROM Genres_Has_Books) as relationships_count,
+                (SELECT COUNT(*) FROM Authors) as authors_count,
+                (SELECT COUNT(*) FROM Genres) as genres_count
+        `);
+        
+        // Get recent data
+        const [recentBooks] = await db.query('SELECT * FROM Books ORDER BY book_id DESC LIMIT 3');
+        const [recentRelationships] = await db.query('SELECT * FROM Genres_Has_Books ORDER BY relationship_id DESC LIMIT 5');
+        
+        res.json({
+            database_info: dbInfo[0],
+            record_counts: counts[0],
+            recent_data: {
+                books: recentBooks,
+                relationships: recentRelationships
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('[DEBUG] Error:', error);
+        res.status(500).json({ error: error.message });
     }
 });
 

@@ -160,6 +160,16 @@ BEGIN
     DECLARE author_exists INT DEFAULT 0;
     DECLARE new_book_id INT DEFAULT 0;
     
+ -- Declare exit handler for SQL exceptions
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error: Transaction failed during book creation' AS error_message;
+    END;
+    
+    -- Start transaction
+    START TRANSACTION;
+    
     -- Check if the author exists
     SELECT COUNT(*) INTO author_exists 
     FROM Authors 
@@ -167,12 +177,16 @@ BEGIN
     
     -- Only add book if author exists
     IF author_exists = 0 THEN
+        ROLLBACK;
         SELECT CONCAT('Error: Author ID ', p_author_id, ' not found.') AS error_message;
     ELSE
         INSERT INTO Books (title, author_id, publication_date, description, total_qty)
         VALUES (p_title, p_author_id, p_publication_date, p_description, p_total_qty);
         
         SET new_book_id = LAST_INSERT_ID();
+        
+        -- Commit the transaction
+        COMMIT;
         
         SELECT CONCAT('Book ID ', new_book_id, ' has been created successfully.') AS message,
                new_book_id AS book_id;
@@ -339,6 +353,16 @@ BEGIN
     DECLARE relationship_exists INT DEFAULT 0;
     DECLARE new_relationship_id INT DEFAULT 0;
     
+    -- Declare exit handler for SQL exceptions
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Error: Transaction failed during relationship creation' AS error_message;
+    END;
+    
+    -- Start transaction
+    START TRANSACTION;
+    
     -- Check if the genre exists
     SELECT COUNT(*) INTO genre_exists 
     FROM Genres 
@@ -356,16 +380,22 @@ BEGIN
     
     -- Only add relationship if both genre and book exist and relationship doesn't already exist
     IF genre_exists = 0 THEN
+        ROLLBACK;
         SELECT CONCAT('Error: Genre ID ', p_genre_id, ' not found.') AS error_message;
     ELSEIF book_exists = 0 THEN
+        ROLLBACK;
         SELECT CONCAT('Error: Book ID ', p_book_id, ' not found.') AS error_message;
     ELSEIF relationship_exists > 0 THEN
+        ROLLBACK;
         SELECT CONCAT('Error: Relationship between Genre ID ', p_genre_id, ' and Book ID ', p_book_id, ' already exists.') AS error_message;
     ELSE
         INSERT INTO Genres_Has_Books (genre_id, book_id)
         VALUES (p_genre_id, p_book_id);
         
         SET new_relationship_id = LAST_INSERT_ID();
+        
+        -- Commit the transaction
+        COMMIT;
         
         SELECT CONCAT('Relationship ID ', new_relationship_id, ' has been created successfully.') AS message,
                new_relationship_id AS relationship_id;
