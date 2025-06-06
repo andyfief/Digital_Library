@@ -1,4 +1,5 @@
 -- Andrew Fief
+-------------CITATIONS---------------------------
 -- I used Claude AI to assist in writing the error handling at the beginning of the procedure. 
 
 DELIMITER //
@@ -453,6 +454,129 @@ BEGIN
         WHERE relationship_id = p_relationship_id;
         
         SELECT CONCAT('Relationship ID ', p_relationship_id, ' has been updated successfully.') AS message;
+    END IF;
+    
+END//
+
+-- DELETE user using stored procedure
+DROP PROCEDURE IF EXISTS delete_user//
+
+CREATE PROCEDURE delete_user(IN p_user_id INT)
+BEGIN
+    -- Declare variable for error handling
+    DECLARE user_exists INT DEFAULT 0;
+    
+    -- Check if the user exists before attempting to delete
+    SELECT COUNT(*) INTO user_exists 
+    FROM Users 
+    WHERE user_id = p_user_id;
+    
+    -- Only delete if the user exists
+    IF user_exists > 0 THEN
+        DELETE FROM Users 
+        WHERE user_id = p_user_id;
+        
+        SELECT CONCAT('User ID ', p_user_id, ' has been deleted.') AS message;
+    ELSE
+        SELECT CONCAT('Error: User ID ', p_user_id, ' not found.') AS error_message;
+    END IF;
+    
+END//
+
+-- ADD user using stored procedure
+DROP PROCEDURE IF EXISTS add_user//
+
+CREATE PROCEDURE add_user(
+    IN p_username VARCHAR(50),
+    IN p_password VARCHAR(255),
+    IN p_email VARCHAR(100)
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE username_exists INT DEFAULT 0;
+    DECLARE email_exists INT DEFAULT 0;
+    DECLARE new_user_id INT DEFAULT 0;
+    
+    -- Check if the username already exists
+    SELECT COUNT(*) INTO username_exists 
+    FROM Users 
+    WHERE username = p_username;
+    
+    -- Check if the email already exists
+    SELECT COUNT(*) INTO email_exists 
+    FROM Users 
+    WHERE email = p_email;
+    
+    -- Only add user if username and email are unique
+    IF username_exists > 0 THEN
+        SELECT CONCAT('Error: Username "', p_username, '" already exists.') AS error_message;
+    ELSEIF email_exists > 0 THEN
+        SELECT CONCAT('Error: Email "', p_email, '" already exists.') AS error_message;
+    ELSE
+        INSERT INTO Users (username, password, email)
+        VALUES (p_username, p_password, p_email);
+        
+        SET new_user_id = LAST_INSERT_ID();
+        
+        SELECT CONCAT('User ID ', new_user_id, ' has been created successfully.') AS message,
+               new_user_id AS user_id;
+    END IF;
+    
+END//
+
+-- UPDATE user using stored procedure
+DROP PROCEDURE IF EXISTS update_user//
+
+CREATE PROCEDURE update_user(
+    IN p_user_id INT,
+    IN p_new_username VARCHAR(50),
+    IN p_new_password VARCHAR(255),
+    IN p_new_email VARCHAR(100)
+)
+BEGIN
+    -- Declare variables for error handling
+    DECLARE user_exists INT DEFAULT 0;
+    DECLARE username_exists INT DEFAULT 0;
+    DECLARE email_exists INT DEFAULT 0;
+    
+    -- Check if the user exists
+    SELECT COUNT(*) INTO user_exists 
+    FROM Users 
+    WHERE user_id = p_user_id;
+    
+    -- Check if the new username already exists (excluding current user)
+    SELECT COUNT(*) INTO username_exists 
+    FROM Users 
+    WHERE username = p_new_username AND user_id != p_user_id;
+    
+    -- Check if the new email already exists (excluding current user)
+    SELECT COUNT(*) INTO email_exists 
+    FROM Users 
+    WHERE email = p_new_email AND user_id != p_user_id;
+    
+    -- Only update user if user exists and new values are unique
+    IF user_exists = 0 THEN
+        SELECT CONCAT('Error: User ID ', p_user_id, ' not found.') AS error_message;
+    ELSEIF username_exists > 0 THEN
+        SELECT CONCAT('Error: Username "', p_new_username, '" already exists.') AS error_message;
+    ELSEIF email_exists > 0 THEN
+        SELECT CONCAT('Error: Email "', p_new_email, '" already exists.') AS error_message;
+    ELSE
+        -- Update user, only update password if it's provided (not empty)
+        IF p_new_password IS NOT NULL AND p_new_password != '' THEN
+            UPDATE Users
+            SET username = p_new_username,
+                password = p_new_password,
+                email = p_new_email
+            WHERE user_id = p_user_id;
+        ELSE
+            UPDATE Users
+            SET username = p_new_username,
+                email = p_new_email
+            WHERE user_id = p_user_id;
+        END IF;
+        
+        SELECT CONCAT('User ID ', p_user_id, ' has been updated successfully.') AS message;
     END IF;
     
 END//

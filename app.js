@@ -227,37 +227,6 @@ app.post('/api/books', async (req, res) => {
     }
 });
 
-/*
-// POST new book using stored procedure
-app.post('/api/books', async (req, res) => {
-    // Claude AI helps add debugging to this, attempting to get M:M table to reflect new books.
-    try {
-        console.log('[API] POST /api/books called with data:', req.body);
-        const { title, author_id, publication_date, description, total_qty } = req.body;
-        
-        // Call the add_book stored procedure
-        const [result] = await db.query('CALL add_book(?, ?, ?, ?, ?)', [title, author_id, publication_date, description, total_qty]);
-        
-        // Check if the procedure returned an error message
-        if (result[0] && result[0].error_message) {
-            console.log('[API] Procedure returned error:', result[0].error_message);
-            res.status(400).json({ error: result[0].error_message });
-        } else {
-            const bookId = result[0].book_id;
-            console.log('[API] Extracted book ID:', bookId);
-            
-            res.json({ 
-                success: true, 
-                message: result[0].message || 'Book created successfully', 
-                book_id: bookId 
-            });
-        }
-    } catch (error) {
-        console.error('Error creating book:', error);
-        res.status(500).json({ error: 'Failed to create book', details: error.message });
-    }
-});
-*/
 // Update book using stored procedure
 app.put('/api/books/:id', async (req, res) => {
 
@@ -446,6 +415,77 @@ app.delete('/api/relationships/:id', async (req, res) => {
     } catch (error) {
         console.error('Error deleting relationship:', error);
         res.status(500).json({ error: 'Failed to delete relationship' });
+    }
+});
+
+// POST new user using stored procedure
+app.post('/api/users', async (req, res) => {
+    try {
+        console.log('[API] POST /api/users called with data:', req.body);
+        const { username, password, email } = req.body;
+        
+        // Call the add_user stored procedure
+        const [result] = await db.query('CALL add_user(?, ?, ?)', [username, password, email]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ 
+                success: true, 
+                message: result[0].message || 'User created successfully', 
+                user_id: result[0].user_id 
+            });
+        }
+    } catch (error) {
+        console.error('Error creating user:', error);
+        res.status(500).json({ error: 'Failed to create user' });
+    }
+});
+
+// Update user using stored procedure
+app.put('/api/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { username, password, email } = req.body;
+
+        console.log('[API] PUT /api/users/' + userId + ' called with data:', req.body);
+        console.log('[API] Calling update_user stored procedure with:', [userId, username, password, email]);
+
+        // Call the update_user stored procedure
+        const [result] = await db.query('CALL update_user(?, ?, ?, ?)', [userId, username, password, email]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'User updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
+});
+
+// DELETE user using stored procedure
+app.delete('/api/users/:id', async (req, res) => {
+    try {
+        const userId = req.params.id;
+        
+        // Call the delete_user stored procedure
+        const [result] = await db.query('CALL delete_user(?)', [userId]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'User deleted successfully' });
+        }
+    } catch (error) {
+        console.error('Error deleting user:', error);
+        res.status(500).json({ error: 'Failed to delete user' });
     }
 });
 
