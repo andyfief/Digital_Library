@@ -90,13 +90,15 @@ app.get('/api/authors', async (req, res) => {
 // GET all books for dropdown
 app.get('/api/books', async (req, res) => {
     try {
+        console.log('[API] GET /api/books called');
         const booksQuery = 'SELECT * FROM Books;';
         const [books] = await db.query(booksQuery);
+        console.log('[API] Books query result:', books.length, 'books found');
         
         const base = "<h1>Database Reset Complete!</h1>";
-        res.send(base + "<p>Users data:</p>" + JSON.stringify(books));
+        res.send(base + "<p>Books data:</p>" + JSON.stringify(books)); // FIXED - now says "Books data"
     } catch (error) {
-        console.error("Error executing queries:", error);
+        console.error("[API] Error executing books query:", error);
         res.status(500).send("An error occurred while executing the database queries.");
     }
 });
@@ -137,11 +139,14 @@ app.delete('/api/rentals/:id', async (req, res) => {
 // POST new rental using stored procedure
 app.post('/api/rentals', async (req, res) => {
     try {
+        console.log('[API] POST /api/rentals called with data:', req.body);
         const { user_id, book_id, date, expiration_date } = req.body;
         
+        console.log('[API] Calling add_rental stored procedure with:', [user_id, book_id, date, expiration_date]);
         // Call the add_rental stored procedure
         const [result] = await db.query('CALL add_rental(?, ?, ?, ?)', [user_id, book_id, date, expiration_date]);
-        
+        console.log('Stored procedure result:', result);
+
         // Check if the procedure returned an error message
         if (result[0] && result[0].error_message) {
             res.status(400).json({ error: result[0].error_message });
@@ -160,7 +165,8 @@ app.put('/api/rentals/:id', async (req, res) => {
         const rentalId = req.params.id;
         const { user_id, book_id, date, expiration_date, date_returned } = req.body;
 
-        console.log('Update rental data:', { rentalId, user_id, book_id, date, expiration_date, date_returned });
+        console.log('[API] PUT /api/rentals/' + rentalId + ' called with data:', req.body);
+        console.log('[API] Calling update_rental stored procedure with:', [rentalId, user_id, book_id, date, expiration_date]);
 
         // Call the update_rental stored procedure
         const [result] = await db.query('CALL update_rental(?, ?, ?, ?, ?)', [rentalId, user_id, book_id, date, expiration_date]);
@@ -182,6 +188,7 @@ app.put('/api/rentals/:id', async (req, res) => {
 // POST new book using stored procedure
 app.post('/api/books', async (req, res) => {
     try {
+        console.log('[API] POST /api/books called with data:', req.body);
         const { title, author_id, publication_date, description, total_qty } = req.body;
         
         // Call the add_book stored procedure
@@ -201,11 +208,13 @@ app.post('/api/books', async (req, res) => {
 
 // Update book using stored procedure
 app.put('/api/books/:id', async (req, res) => {
+
     try {
         const bookId = req.params.id;
         const { title, author_id, publication_date, description, total_qty } = req.body;
 
-        console.log('Update book data:', { bookId, title, author_id, publication_date, description, total_qty });
+        console.log('[API] PUT /api/books/' + bookId + ' called with data:', req.body);
+        console.log('[API] Calling update_book stored procedure with:', [bookId, title, author_id, publication_date, description, total_qty]);
 
         // Call the update_book stored procedure
         const [result] = await db.query('CALL update_book(?, ?, ?, ?, ?, ?)', [bookId, title, author_id, publication_date, description, total_qty]);
@@ -251,6 +260,73 @@ app.post('/api/reset', async (req, res) => {
     } catch (error) {
         console.error('Error resetting database:', error);
         res.status(500).json({ error: 'Failed to reset database' });
+    }
+});
+
+// POST new author using stored procedure
+app.post('/api/authors', async (req, res) => {
+    try {
+        console.log('[API] POST /api/authors called with data:', req.body);
+        const { name, bio } = req.body;
+        
+        // Call the add_author stored procedure
+        const [result] = await db.query('CALL add_author(?, ?)', [name, bio]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(400).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Author created successfully', author_id: result[0].author_id });
+        }
+    } catch (error) {
+        console.error('Error creating author:', error);
+        res.status(500).json({ error: 'Failed to create author' });
+    }
+});
+
+// Update author using stored procedure
+app.put('/api/authors/:id', async (req, res) => {
+    try {
+        const authorId = req.params.id;
+        const { name, bio } = req.body;
+
+        console.log('[API] PUT /api/authors/' + authorId + ' called with data:', req.body);
+        console.log('[API] Calling update_author stored procedure with:', [authorId, name, bio]);
+
+        // Call the update_author stored procedure
+        const [result] = await db.query('CALL update_author(?, ?, ?)', [authorId, name, bio]);
+        
+        console.log('Stored procedure result:', result);
+
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Author updated successfully' });
+        }
+    } catch (error) {
+        console.error('Error updating author:', error);
+        res.status(500).json({ error: 'Failed to update author' });
+    }
+});
+
+// DELETE author using stored procedure
+app.delete('/api/authors/:id', async (req, res) => {
+    try {
+        const authorId = req.params.id;
+        
+        // Call the delete_author stored procedure
+        const [result] = await db.query('CALL delete_author(?)', [authorId]);
+        
+        // Check if the procedure returned an error message
+        if (result[0] && result[0].error_message) {
+            res.status(404).json({ error: result[0].error_message });
+        } else {
+            res.json({ success: true, message: result[0].message || 'Author deleted successfully' });
+        }
+    } catch (error) {
+        console.error('Error deleting author:', error);
+        res.status(500).json({ error: 'Failed to delete author' });
     }
 });
 

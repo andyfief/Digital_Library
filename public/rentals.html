@@ -61,6 +61,21 @@
         .nav-links {
             margin-bottom: 20px;
         }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -78,6 +93,7 @@
     </header>
 
     <div id="message"></div>
+    
     <section>
         <h2>Create New Rental</h2>
         <form id="createRentalForm">
@@ -120,12 +136,9 @@
         <form id="editRentalForm">
             <div>
                 <label for="edit_rental_id">Rental ID:</label>
-                <select id="edit_rental_id" name="rental_id">
+                <select id="edit_rental_id" name="rental_id" onchange="loadRentalData()">
                     <option value="">Select Rental to Edit</option>
-                    <option value="1">1 - fiefa (Harry Potter)</option>
-                    <option value="2">2 - bookLuvr2004 (Harry Potter) - Returned</option>
-                    <option value="3">3 - bookLuvr2004 (Animal Farm)</option>
-                    <option value="4">4 - bookLuvr2004 (Lightning Thief)</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -163,6 +176,7 @@
             <button type="button" onclick="clearEditForm()">Clear Form</button>
         </form>
     </section>
+    
     <section>
         <h2>Rentals Table</h2>
         <table>
@@ -183,13 +197,26 @@
     </section>
 
     <script>
-        console.log('rentals script')
+        console.log('[INIT] Rentals script loaded');
+        
+        // Store rentals data globally for easy access
+        let allRentals = [];
+
+        function showMessage(message, type = 'success') {
+            console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
         async function loadRentals() {
-            console.log('loadRentals() called');
+            console.log('[LOAD] loadRentals() called');
             try {
-                console.log('Fetching from /api/rentals...');
+                console.log('[LOAD] Fetching from /api/rentals...');
                 const response = await fetch('/api/rentals');
-                console.log('Response status:', response.status);
+                console.log('[LOAD] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -197,10 +224,9 @@
                 
                 // Get the HTML response
                 const htmlResponse = await response.text();
-                console.log('Raw response:', htmlResponse);
+                console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
                 // Extract JSON from the HTML response
-                // Your response format: "<h1>Database Reset Complete!</h1><p>Rentals data:</p>[{...}]"
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
                 if (!jsonMatch) {
@@ -208,78 +234,154 @@
                 }
                 
                 const jsonString = jsonMatch[0];
-                console.log('Extracted JSON string:', jsonString);
+                console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const rentals = JSON.parse(jsonString);
-                console.log('Parsed rentals data:', rentals);
+                console.log('[LOAD] Parsed rentals data:', rentals);
                 
-                // Populate the table
-                const tbody = document.getElementById('rentalsTableBody');
-                if (!tbody) {
-                    console.error('Could not find rentalsTableBody');
-                    return;
-                }
+                // Store rentals globally
+                allRentals = rentals;
                 
-                tbody.innerHTML = '';
+                // Populate the table and edit dropdown
+                populateRentalsTable(rentals);
+                populateEditDropdown(rentals);
                 
-                if (rentals.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                                No rentals found
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Create table rows for each rental
-                rentals.forEach((rental, index) => {
-                    console.log(`Processing rental ${index + 1}:`, rental);
-                    const row = document.createElement('tr');
-                    
-                    const expirationDate = new Date(rental.expiration_date);
-
-                    row.innerHTML = `
-                        <td>${rental.rental_id || 'N/A'}</td>
-                        <td>${rental.user_id || 'N/A'}</td>
-                        <td>${rental.book_id || 'N/A'}</td>
-                        <td>${rental.date || 'N/A'}</td>
-                        <td>${rental.expiration_date || 'N/A'}</td>
-                        <td class="actions">
-                            <button class="delete-btn" onclick="deleteRental(${rental.rental_id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`Successfully populated table with ${rentals.length} rentals`);
+                console.log(`[LOAD] Successfully loaded ${rentals.length} rentals`);
                 
             } catch (error) {
-                console.error('Error in loadRentals:', error);
+                console.error('[LOAD] Error in loadRentals:', error);
+                showMessage('Error loading rentals: ' + error.message, 'error');
             }
         }
 
+        function populateRentalsTable(rentals) {
+            console.log('[TABLE] Populating rentals table with', rentals.length, 'rentals');
+            const tbody = document.getElementById('rentalsTableBody');
+            if (!tbody) {
+                console.error('[TABLE] Could not find rentalsTableBody');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (rentals.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
+                            No rentals found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Create table rows for each rental
+            rentals.forEach((rental, index) => {
+                console.log(`[TABLE] Processing rental ${index + 1}:`, rental);
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${rental.rental_id || 'N/A'}</td>
+                    <td>${rental.user_id || 'N/A'}</td>
+                    <td>${rental.book_id || 'N/A'}</td>
+                    <td>${rental.date ? rental.date.split('T')[0] : '' || 'N/A'}</td>
+                    <td>${rental.date ? rental.date.split('T')[0] : '' || 'N/A'}</td>
+                    <td class="actions">
+                        <button class="delete-btn" onclick="deleteRental(${rental.rental_id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log(`[TABLE] Successfully populated table with ${rentals.length} rentals`);
+        }
+
+        function populateEditDropdown(rentals) {
+            console.log('[DROPDOWN] Populating edit dropdown with', rentals.length, 'rentals');
+            const select = document.getElementById('edit_rental_id');
+            if (!select) {
+                console.error('[DROPDOWN] Could not find edit_rental_id select');
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Rental to Edit</option>';
+            
+            rentals.forEach(rental => {
+                const option = document.createElement('option');
+                option.value = rental.rental_id;
+                option.textContent = `${rental.rental_id} - User ${rental.user_id} (Book ${rental.book_id})`;
+                select.appendChild(option);
+            });
+            
+            console.log('[DROPDOWN] Successfully populated dropdown');
+        }
+
+        function loadRentalData() {
+            console.log('[EDIT] loadRentalData() called');
+            const select = document.getElementById('edit_rental_id');
+            const rentalId = select.value;
+            
+            console.log('[EDIT] Selected rental ID:', rentalId);
+            
+            if (!rentalId) {
+                console.log('[EDIT] No rental selected, clearing form');
+                clearEditForm();
+                return;
+            }
+            
+            // Find the rental in our stored data
+            const rental = allRentals.find(r => r.rental_id == rentalId);
+            console.log('[EDIT] Found rental data:', rental);
+            
+            if (!rental) {
+                console.error('[EDIT] Rental not found in stored data');
+                showMessage('Rental data not found', 'error');
+                return;
+            }
+            
+            // Populate the form fields
+            document.getElementById('edit_user').value = rental.user_id || '';
+            document.getElementById('edit_book').value = rental.book_id || '';
+            // format dates for correct display
+            document.getElementById('edit_date').value = rental.date ? rental.date.split('T')[0] : '';
+            document.getElementById('edit_expiration_date').value = rental.expiration_date ? rental.expiration_date.split('T')[0] : '';
+            
+            console.log('[EDIT] Form populated with rental data');
+        }
+
         async function deleteRental(rentalId) {
+            console.log('[DELETE] deleteRental called for ID:', rentalId);
             if (confirm(`Are you sure you want to delete rental ${rentalId}?`)) {
                 try {
+                    console.log('[DELETE] Sending DELETE request for rental:', rentalId);
                     const response = await fetch(`/api/rentals/${rentalId}`, {
                         method: 'DELETE'
                     });
                     
+                    console.log('[DELETE] Response status:', response.status);
                     const result = await response.json();
+                    console.log('[DELETE] Response data:', result);
                     
                     if (response.ok) {
+                        console.log('[DELETE] Rental deleted successfully');
+                        showMessage(result.message || 'Rental deleted successfully', 'success');
                         loadRentals(); // Reload the table
+                    } else {
+                        console.error('[DELETE] Error deleting rental:', result.error);
+                        showMessage(result.error || 'Error deleting rental', 'error');
                     }
                 } catch (error) {
-                    console.error('Error deleting rental:', error);
+                    console.error('[DELETE] Error deleting rental:', error);
+                    showMessage('Error deleting rental: ' + error.message, 'error');
                 }
             }
         }
 
         async function createRental(formData) {
+            console.log('[CREATE] createRental called with data:', formData);
             try {
+                console.log('[CREATE] Sending POST request to /api/rentals');
                 const response = await fetch('/api/rentals', {
                     method: 'POST',
                     headers: {
@@ -288,21 +390,29 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('[CREATE] Response status:', response.status);
                 const result = await response.json();
+                console.log('[CREATE] Response data:', result);
                 
                 if (response.ok) {
+                    console.log('[CREATE] Rental created successfully:', result.message);
+                    showMessage(result.message || 'Rental created successfully', 'success');
                     document.getElementById('createRentalForm').reset();
                     loadRentals(); // Reload the table
                 } else {
-                    console.log('rental response not OK');
+                    console.error('[CREATE] Error creating rental:', result.error);
+                    showMessage(result.error || 'Error creating rental', 'error');
                 }
             } catch (error) {
-                console.error('Error creating rental:', error);
+                console.error('[CREATE] Error creating rental:', error);
+                showMessage('Error creating rental: ' + error.message, 'error');
             }
         }
 
         async function updateRental(rentalId, formData) {
+            console.log('[UPDATE] updateRental called for ID:', rentalId, 'with data:', formData);
             try {
+                console.log('[UPDATE] Sending PUT request to /api/rentals/' + rentalId);
                 const response = await fetch(`/api/rentals/${rentalId}`, {
                     method: 'PUT',
                     headers: {
@@ -311,28 +421,58 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('[UPDATE] Response status:', response.status);
                 const result = await response.json();
+                console.log('[UPDATE] Response data:', result);
                 
                 if (response.ok) {
-                    console.log('Rental updated successfully:', result.message);
+                    console.log('[UPDATE] Rental updated successfully:', result.message);
+                    showMessage(result.message || 'Rental updated successfully', 'success');
                     clearEditForm();
                     loadRentals(); // Reload the table
                 } else {
-                    console.log('Error updating rental:', result.error);
+                    console.error('[UPDATE] Error updating rental:', result.error);
+                    showMessage(result.error || 'Error updating rental', 'error');
                 }
             } catch (error) {
-                console.error('Error updating rental:', error);
+                console.error('[UPDATE] Error updating rental:', error);
+                showMessage('Error updating rental: ' + error.message, 'error');
             }
         }
 
+        function clearEditForm() {
+            console.log('[EDIT] Clearing edit form');
+            document.getElementById('editRentalForm').reset();
+        }
+
+        document.getElementById('createRentalForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Create rental form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const rentalData = {
+                user_id: parseInt(formData.get('user_id')),
+                book_id: parseInt(formData.get('book_id')),
+                date: formData.get('date'),
+                expiration_date: formData.get('expiration_date')
+            };
+            
+            console.log('[FORM] Parsed create rental data:', rentalData);
+            createRental(rentalData);
+        });
+
         document.getElementById('editRentalForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Edit rental form submitted');
             e.preventDefault();
             
             const formData = new FormData(this);
             const rentalId = formData.get('rental_id');
             
+            console.log('[FORM] Selected rental ID for edit:', rentalId);
+            
             if (!rentalId) {
-                console.log('Please select a rental to edit');
+                console.error('[FORM] No rental selected for edit');
+                showMessage('Please select a rental to edit', 'error');
                 return;
             }
             
@@ -344,29 +484,12 @@
                 date_returned: formData.get('date_returned') || null
             };
             
+            console.log('[FORM] Parsed edit rental data:', rentalData);
             updateRental(rentalId, rentalData);
         });
 
-        function clearEditForm() {
-            document.getElementById('editRentalForm').reset();
-        }
-
-        document.getElementById('createRentalForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const rentalData = {
-                user_id: parseInt(formData.get('user_id')),
-                book_id: parseInt(formData.get('book_id')),
-                date: formData.get('date'),
-                expiration_date: formData.get('expiration_date')
-            };
-            
-            createRental(rentalData);
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, ready to load rentals');
+            console.log('[INIT] Page loaded, ready to load rentals');
             loadRentals();
         });
     </script>

@@ -70,6 +70,21 @@
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -85,6 +100,8 @@
             <a href="update_book_genres.html">Book Genres</a>
         </div>
     </header>
+
+    <div id="message"></div>
 
     <section>
         <h2>Add New Book</h2>
@@ -140,9 +157,7 @@
                 <label for="edit_book_id">Book ID:</label>
                 <select id="edit_book_id" name="book_id" onchange="loadBookData()" required>
                     <option value="">Select Book to Edit</option>
-                    <option value="1">1 - Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">2 - Animal Farm</option>
-                    <option value="3">3 - The Lightning Thief</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -213,12 +228,25 @@
 
     <script>
         console.log('Books script loaded');
+        
+        // Store books data globally for easy access
+        let allBooks = [];
+
+        function showMessage(message, type = 'success') {
+            console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
         async function loadBooks() {
-            console.log('loadBooks() called');
+            console.log('[LOAD] loadBooks() called');
             try {
-                console.log('Fetching from /api/books...');
+                console.log('[LOAD] Fetching from /api/books...');
                 const response = await fetch('/api/books');
-                console.log('Response status:', response.status);
+                console.log('[LOAD] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -226,10 +254,9 @@
                 
                 // Get the HTML response
                 const htmlResponse = await response.text();
-                console.log('Raw response:', htmlResponse);
+                console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
                 // Extract JSON from the HTML response
-                // response format: "<h1>Database Reset Complete!</h1><p>Users data:</p>[{...}]"
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
                 if (!jsonMatch) {
@@ -237,78 +264,157 @@
                 }
                 
                 const jsonString = jsonMatch[0];
-                console.log('Extracted JSON string:', jsonString);
+                console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const books = JSON.parse(jsonString);
-                console.log('Parsed books data:', books);
+                console.log('[LOAD] Parsed books data:', books);
+                
+                // Store books globally
+                allBooks = books;
                 
                 // Populate the table
-                const tbody = document.getElementById('booksTableBody');
-                if (!tbody) {
-                    console.error('Could not find booksTableBody');
-                    return;
-                }
+                populateBooksTable(books);
                 
-                tbody.innerHTML = '';
+                // Populate the edit dropdown
+                populateEditDropdown(books);
                 
-                if (books.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                                No books found
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Create table rows for each rental
-                books.forEach((book, index) => {
-                    console.log(`Processing book ${index + 1}:`, book);
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${book.book_id || 'N/A'}</td>
-                        <td>${book.title || 'N/A'}</td>
-                        <td>${book.author_id || 'N/A'}</td>
-                        <td>${book.publication_date || 'N/A'}</td>
-                        <td>${book.total_qty || 'N/A'}</td>
-                        <td>${book.description || 'N/A'}</td>
-                        <td class="actions">
-                            <button class="delete-btn" onclick="deleteBook(${book.book_id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`Successfully populated table with ${books.length} books`);
+                console.log(`[LOAD] Successfully loaded ${books.length} books`);
                 
             } catch (error) {
-                console.error('Error in loadBooks:', error);
+                console.error('[LOAD] Error in loadBooks:', error);
+                showMessage('Error loading books: ' + error.message, 'error');
             }
         }
 
-         async function deleteBook(bookId) {
+        function populateBooksTable(books) {
+            console.log('[TABLE] Populating books table with', books.length, 'books');
+            const tbody = document.getElementById('booksTableBody');
+            if (!tbody) {
+                console.error('[TABLE] Could not find booksTableBody');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (books.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 20px; color: #666;">
+                            No books found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Create table rows for each book
+            books.forEach((book, index) => {
+                console.log(`[TABLE] Processing book ${index + 1}:`, book);
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${book.book_id || 'N/A'}</td>
+                    <td>${book.title || 'N/A'}</td>
+                    <td>${book.author_id || 'N/A'}</td>
+                    <td>${book.publication_date || 'N/A'}</td>
+                    <td>${book.total_qty || 'N/A'}</td>
+                    <td>${book.description || 'N/A'}</td>
+                    <td class="actions">
+                        <button class="delete-btn" onclick="deleteBook(${book.book_id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log(`[TABLE] Successfully populated table with ${books.length} books`);
+        }
+
+        function populateEditDropdown(books) {
+            console.log('[DROPDOWN] Populating edit dropdown with', books.length, 'books');
+            const select = document.getElementById('edit_book_id');
+            if (!select) {
+                console.error('[DROPDOWN] Could not find edit_book_id select');
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Book to Edit</option>';
+            
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.book_id;
+                option.textContent = `${book.book_id} - ${book.title}`;
+                select.appendChild(option);
+            });
+            
+            console.log('[DROPDOWN] Successfully populated dropdown');
+        }
+
+        async function loadBookData() {
+            console.log('[EDIT] loadBookData() called');
+            const select = document.getElementById('edit_book_id');
+            const bookId = select.value;
+            
+            console.log('[EDIT] Selected book ID:', bookId);
+            
+            if (!bookId) {
+                console.log('[EDIT] No book selected, clearing form');
+                clearEditForm();
+                return;
+            }
+            
+            // Find the book in our stored data
+            const book = allBooks.find(b => b.book_id == bookId);
+            console.log('[EDIT] Found book data:', book);
+            
+            if (!book) {
+                console.error('[EDIT] Book not found in stored data');
+                showMessage('Book data not found', 'error');
+                return;
+            }
+            
+            // Populate the form fields
+            document.getElementById('edit_title').value = book.title || '';
+            document.getElementById('edit_author').value = book.author_id || '';
+            document.getElementById('edit_publication_date').value = book.publication_date ? book.publication_date.split('T')[0] : '';
+            document.getElementById('edit_description').value = book.description || '';
+            document.getElementById('edit_total_qty').value = book.total_qty || '';
+            
+            console.log('[EDIT] Form populated with book data');
+        }
+
+        async function deleteBook(bookId) {
+            console.log('[DELETE] deleteBook called for ID:', bookId);
             if (confirm(`Are you sure you want to delete book ${bookId}?`)) {
                 try {
+                    console.log('[DELETE] Sending DELETE request for book:', bookId);
                     const response = await fetch(`/api/books/${bookId}`, {
                         method: 'DELETE'
                     });
                     
+                    console.log('[DELETE] Response status:', response.status);
                     const result = await response.json();
+                    console.log('[DELETE] Response data:', result);
                     
                     if (response.ok) {
+                        console.log('[DELETE] Book deleted successfully');
+                        showMessage(result.message || 'Book deleted successfully', 'success');
                         loadBooks(); // Reload the table
+                    } else {
+                        console.error('[DELETE] Error deleting book:', result.error);
+                        showMessage(result.error || 'Error deleting book', 'error');
                     }
                 } catch (error) {
-                    console.error('Error deleting book:', error);
+                    console.error('[DELETE] Error deleting book:', error);
                     showMessage('Error deleting book: ' + error.message, 'error');
                 }
             }
         }
 
         async function createBook(formData) {
+            console.log('[CREATE] createBook called with data:', formData);
             try {
+                console.log('[CREATE] Sending POST request to /api/books');
                 const response = await fetch('/api/books', {
                     method: 'POST',
                     headers: {
@@ -317,22 +423,29 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('[CREATE] Response status:', response.status);
                 const result = await response.json();
+                console.log('[CREATE] Response data:', result);
                 
                 if (response.ok) {
-                    console.log('Book created successfully:', result.message);
+                    console.log('[CREATE] Book created successfully:', result.message);
+                    showMessage(result.message || 'Book created successfully', 'success');
                     document.getElementById('addBookForm').reset();
                     loadBooks(); // Reload the table
                 } else {
-                    console.log('Error creating book:', result.error);
+                    console.error('[CREATE] Error creating book:', result.error);
+                    showMessage(result.error || 'Error creating book', 'error');
                 }
             } catch (error) {
-                console.error('Error creating book:', error);
+                console.error('[CREATE] Error creating book:', error);
+                showMessage('Error creating book: ' + error.message, 'error');
             }
         }
 
         async function updateBook(bookId, formData) {
+            console.log('[UPDATE] updateBook called for ID:', bookId, 'with data:', formData);
             try {
+                console.log('[UPDATE] Sending PUT request to /api/books/' + bookId);
                 const response = await fetch(`/api/books/${bookId}`, {
                     method: 'PUT',
                     headers: {
@@ -341,25 +454,32 @@
                     body: JSON.stringify(formData)
                 });
                 
+                console.log('[UPDATE] Response status:', response.status);
                 const result = await response.json();
+                console.log('[UPDATE] Response data:', result);
                 
                 if (response.ok) {
-                    console.log('Book updated successfully:', result.message);
+                    console.log('[UPDATE] Book updated successfully:', result.message);
+                    showMessage(result.message || 'Book updated successfully', 'success');
                     clearEditForm();
                     loadBooks(); // Reload the table
                 } else {
-                    console.log('Error updating book:', result.error);
+                    console.error('[UPDATE] Error updating book:', result.error);
+                    showMessage(result.error || 'Error updating book', 'error');
                 }
             } catch (error) {
-                console.error('Error updating book:', error);
+                console.error('[UPDATE] Error updating book:', error);
+                showMessage('Error updating book: ' + error.message, 'error');
             }
         }
 
         function clearEditForm() {
+            console.log('[EDIT] Clearing edit form');
             document.getElementById('editBookForm').reset();
         }
 
         document.getElementById('addBookForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Add book form submitted');
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -371,17 +491,22 @@
                 total_qty: parseInt(formData.get('total_qty'))
             };
             
+            console.log('[FORM] Parsed add book data:', bookData);
             createBook(bookData);
         });
 
         document.getElementById('editBookForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Edit book form submitted');
             e.preventDefault();
             
             const formData = new FormData(this);
             const bookId = formData.get('book_id');
             
+            console.log('[FORM] Selected book ID for edit:', bookId);
+            
             if (!bookId) {
-                console.log('Please select a book to edit');
+                console.error('[FORM] No book selected for edit');
+                showMessage('Please select a book to edit', 'error');
                 return;
             }
             
@@ -393,11 +518,12 @@
                 total_qty: parseInt(formData.get('total_qty'))
             };
             
+            console.log('[FORM] Parsed edit book data:', bookData);
             updateBook(bookId, bookData);
         });
 
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, ready to load books');
+            console.log('[INIT] Page loaded, ready to load books');
             loadBooks();
         });
     </script>

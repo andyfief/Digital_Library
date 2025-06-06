@@ -225,4 +225,81 @@ BEGIN
     
 END//
 
+
+
+DROP PROCEDURE IF EXISTS delete_author//
+
+CREATE PROCEDURE delete_author(IN p_author_id INT)
+BEGIN
+    -- Declare variable for error handling
+    DECLARE author_exists INT DEFAULT 0;
+    
+    -- Check if the author exists before attempting to delete
+    SELECT COUNT(*) INTO author_exists 
+    FROM Authors 
+    WHERE author_id = p_author_id;
+    
+    -- Only delete if the author exists
+    IF author_exists > 0 THEN
+        DELETE FROM Authors 
+        WHERE author_id = p_author_id;
+        
+        SELECT CONCAT('Author ID ', p_author_id, ' has been deleted.') AS message;
+    ELSE
+        SELECT CONCAT('Error: Author ID ', p_author_id, ' not found.') AS error_message;
+    END IF;
+    
+END//
+
+DROP PROCEDURE IF EXISTS add_author//
+
+CREATE PROCEDURE add_author(
+    IN p_name VARCHAR(255),
+    IN p_bio TEXT
+)
+BEGIN
+    -- Declare variable for new author ID
+    DECLARE new_author_id INT DEFAULT 0;
+    
+    -- Insert the new author
+    INSERT INTO Authors (name, bio)
+    VALUES (p_name, p_bio);
+    
+    SET new_author_id = LAST_INSERT_ID();
+    
+    SELECT CONCAT('Author ID ', new_author_id, ' has been created successfully.') AS message,
+           new_author_id AS author_id;
+    
+END//
+
+DROP PROCEDURE IF EXISTS update_author//
+
+CREATE PROCEDURE update_author(
+    IN p_author_id INT,
+    IN p_new_name VARCHAR(255),
+    IN p_new_bio TEXT
+)
+BEGIN
+    -- Declare variable for error handling
+    DECLARE author_exists INT DEFAULT 0;
+    
+    -- Check if the author exists
+    SELECT COUNT(*) INTO author_exists 
+    FROM Authors 
+    WHERE author_id = p_author_id;
+    
+    -- Only edit author if it exists
+    IF author_exists = 0 THEN
+        SELECT CONCAT('Error: Author ID ', p_author_id, ' not found.') AS error_message;
+    ELSE
+        UPDATE Authors
+        SET name = p_new_name,
+            bio = p_new_bio
+        WHERE author_id = p_author_id;
+        
+        SELECT CONCAT('Author ID ', p_author_id, ' has been updated successfully.') AS message;
+    END IF;
+    
+END//
+
 DELIMITER ;

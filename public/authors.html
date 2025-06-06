@@ -38,7 +38,7 @@
             display: block;
             margin-top: 10px;
         }
-        input, textarea {
+        input, textarea, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -67,6 +67,21 @@
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -78,10 +93,12 @@
             <a href="authors.html">Authors</a> |
             <a href="genres.html">Genres</a> |
             <a href="users.html">Users</a> |
-            <a href="rentals.html">Rentals</a>
+            <a href="rentals.html">Rentals</a> |
             <a href="update_book_genres.html">Update Book Genres</a>
         </div>
     </header>
+
+    <div id="message"></div>
 
     <section>
         <h2>Add New Author</h2>
@@ -107,9 +124,7 @@
                 <label for="edit_author_id">Author ID:</label>
                 <select id="edit_author_id" name="author_id" onchange="loadAuthorData()" required>
                     <option value="">Select Author to Edit</option>
-                    <option value="1">1 - J.K. Rowling</option>
-                    <option value="2">2 - George Orwell</option>
-                    <option value="3">3 - Rick Riordan</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -147,12 +162,26 @@
     </section>
 
     <script>
+        console.log('[INIT] Authors script loaded');
+        
+        // Store authors data globally for easy access
+        let allAuthors = [];
+
+        function showMessage(message, type = 'success') {
+            console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 5000);
+        }
+
         async function loadAuthors() {
-            console.log('loadAuthors() called');
+            console.log('[LOAD] loadAuthors() called');
             try {
-                console.log('Fetching from /api/authors...');
+                console.log('[LOAD] Fetching from /api/authors...');
                 const response = await fetch('/api/authors');
-                console.log('Response status:', response.status);
+                console.log('[LOAD] Response status:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -160,10 +189,9 @@
                 
                 // Get the HTML response
                 const htmlResponse = await response.text();
-                console.log('Raw response:', htmlResponse);
+                console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
                 // Extract JSON from the HTML response
-                // response format: "<h1>Database Reset Complete!</h1><p>Users data:</p>[{...}]"
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
                 if (!jsonMatch) {
@@ -171,65 +199,254 @@
                 }
                 
                 const jsonString = jsonMatch[0];
-                console.log('Extracted JSON string:', jsonString);
+                console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const authors = JSON.parse(jsonString);
-                console.log('Parsed authors data:', authors);
+                console.log('[LOAD] Parsed authors data:', authors);
                 
-                // Populate the table
-                const tbody = document.getElementById('authorsTableBody');
-                if (!tbody) {
-                    console.error('Could not find authorsTableBody');
-                    return;
-                }
+                // Store authors globally
+                allAuthors = authors;
                 
-                tbody.innerHTML = '';
+                // Populate the table and edit dropdown
+                populateAuthorsTable(authors);
+                populateEditDropdown(authors);
                 
-                if (authors.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" style="text-align: center; padding: 20px; color: #666;">
-                                No authors found
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Create table rows for each rental
-                authors.forEach((author, index) => {
-                    console.log(`Processing author ${index + 1}:`, author);
-                    const row = document.createElement('tr');
-                    
-                    row.innerHTML = `
-                        <td>${author.author_id || 'N/A'}</td>
-                        <td>${author.name || 'N/A'}</td>
-                        <td>${author.bio || 'N/A'}</td>
-                        <td class="actions">
-                            <button class="delete-btn" onclick="deleteAuthor(${author.author_id})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                console.log(`Successfully populated table with ${authors.length} authors`);
+                console.log(`[LOAD] Successfully loaded ${authors.length} authors`);
                 
             } catch (error) {
-                console.error('Error in loadAuthors:', error);
+                console.error('[LOAD] Error in loadAuthors:', error);
+                showMessage('Error loading authors: ' + error.message, 'error');
             }
         }
-        
-        function clearEditForm() {
-            document.getElementById('edit_author_id').value = '';
-            document.getElementById('edit_name').value = '';
-            document.getElementById('edit_bio').value = '';
+
+        function populateAuthorsTable(authors) {
+            console.log('[TABLE] Populating authors table with', authors.length, 'authors');
+            const tbody = document.getElementById('authorsTableBody');
+            if (!tbody) {
+                console.error('[TABLE] Could not find authorsTableBody');
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            
+            if (authors.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: #666;">
+                            No authors found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Create table rows for each author
+            authors.forEach((author, index) => {
+                console.log(`[TABLE] Processing author ${index + 1}:`, author);
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${author.author_id || 'N/A'}</td>
+                    <td>${author.name || 'N/A'}</td>
+                    <td>${author.bio || 'N/A'}</td>
+                    <td class="actions">
+                        <button class="delete-btn" onclick="deleteAuthor(${author.author_id})">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            console.log(`[TABLE] Successfully populated table with ${authors.length} authors`);
         }
 
-         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, ready to load authors');
-            loadAuthors();
+        function populateEditDropdown(authors) {
+            console.log('[DROPDOWN] Populating edit dropdown with', authors.length, 'authors');
+            const select = document.getElementById('edit_author_id');
+            if (!select) {
+                console.error('[DROPDOWN] Could not find edit_author_id select');
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Author to Edit</option>';
+            
+            authors.forEach(author => {
+                const option = document.createElement('option');
+                option.value = author.author_id;
+                option.textContent = `${author.author_id} - ${author.name}`;
+                select.appendChild(option);
+            });
+            
+            console.log('[DROPDOWN] Successfully populated dropdown');
+        }
+
+        function loadAuthorData() {
+            console.log('[EDIT] loadAuthorData() called');
+            const select = document.getElementById('edit_author_id');
+            const authorId = select.value;
+            
+            console.log('[EDIT] Selected author ID:', authorId);
+            
+            if (!authorId) {
+                console.log('[EDIT] No author selected, clearing form');
+                clearEditForm();
+                return;
+            }
+            
+            // Find the author in our stored data
+            const author = allAuthors.find(a => a.author_id == authorId);
+            console.log('[EDIT] Found author data:', author);
+            
+            if (!author) {
+                console.error('[EDIT] Author not found in stored data');
+                showMessage('Author data not found', 'error');
+                return;
+            }
+            
+            // Populate the form fields
+            document.getElementById('edit_name').value = author.name || '';
+            document.getElementById('edit_bio').value = author.bio || '';
+            
+            console.log('[EDIT] Form populated with author data');
+        }
+
+        async function deleteAuthor(authorId) {
+            console.log('[DELETE] deleteAuthor called for ID:', authorId);
+            if (confirm(`Are you sure you want to delete author ${authorId}?`)) {
+                try {
+                    console.log('[DELETE] Sending DELETE request for author:', authorId);
+                    const response = await fetch(`/api/authors/${authorId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    console.log('[DELETE] Response status:', response.status);
+                    const result = await response.json();
+                    console.log('[DELETE] Response data:', result);
+                    
+                    if (response.ok) {
+                        console.log('[DELETE] Author deleted successfully');
+                        showMessage(result.message || 'Author deleted successfully', 'success');
+                        loadAuthors(); // Reload the table
+                    } else {
+                        console.error('[DELETE] Error deleting author:', result.error);
+                        showMessage(result.error || 'Error deleting author', 'error');
+                    }
+                } catch (error) {
+                    console.error('[DELETE] Error deleting author:', error);
+                    showMessage('Error deleting author: ' + error.message, 'error');
+                }
+            }
+        }
+
+        async function createAuthor(formData) {
+            console.log('[CREATE] createAuthor called with data:', formData);
+            try {
+                console.log('[CREATE] Sending POST request to /api/authors');
+                const response = await fetch('/api/authors', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[CREATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[CREATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[CREATE] Author created successfully:', result.message);
+                    showMessage(result.message || 'Author created successfully', 'success');
+                    document.getElementById('addAuthorForm').reset();
+                    loadAuthors(); // Reload the table
+                } else {
+                    console.error('[CREATE] Error creating author:', result.error);
+                    showMessage(result.error || 'Error creating author', 'error');
+                }
+            } catch (error) {
+                console.error('[CREATE] Error creating author:', error);
+                showMessage('Error creating author: ' + error.message, 'error');
+            }
+        }
+
+        async function updateAuthor(authorId, formData) {
+            console.log('[UPDATE] updateAuthor called for ID:', authorId, 'with data:', formData);
+            try {
+                console.log('[UPDATE] Sending PUT request to /api/authors/' + authorId);
+                const response = await fetch(`/api/authors/${authorId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                console.log('[UPDATE] Response status:', response.status);
+                const result = await response.json();
+                console.log('[UPDATE] Response data:', result);
+                
+                if (response.ok) {
+                    console.log('[UPDATE] Author updated successfully:', result.message);
+                    showMessage(result.message || 'Author updated successfully', 'success');
+                    clearEditForm();
+                    loadAuthors(); // Reload the table
+                } else {
+                    console.error('[UPDATE] Error updating author:', result.error);
+                    showMessage(result.error || 'Error updating author', 'error');
+                }
+            } catch (error) {
+                console.error('[UPDATE] Error updating author:', error);
+                showMessage('Error updating author: ' + error.message, 'error');
+            }
+        }
+
+        function clearEditForm() {
+            console.log('[EDIT] Clearing edit form');
+            document.getElementById('editAuthorForm').reset();
+        }
+
+        document.getElementById('addAuthorForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Add author form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const authorData = {
+                name: formData.get('name'),
+                bio: formData.get('bio') || null
+            };
+            
+            console.log('[FORM] Parsed add author data:', authorData);
+            createAuthor(authorData);
         });
 
+        document.getElementById('editAuthorForm').addEventListener('submit', function(e) {
+            console.log('[FORM] Edit author form submitted');
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const authorId = formData.get('author_id');
+            
+            console.log('[FORM] Selected author ID for edit:', authorId);
+            
+            if (!authorId) {
+                console.error('[FORM] No author selected for edit');
+                showMessage('Please select an author to edit', 'error');
+                return;
+            }
+            
+            const authorData = {
+                name: formData.get('name'),
+                bio: formData.get('bio') || null
+            };
+            
+            console.log('[FORM] Parsed edit author data:', authorData);
+            updateAuthor(authorId, authorData);
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[INIT] Page loaded, ready to load authors');
+            loadAuthors();
+        });
     </script>
 
     <footer>
