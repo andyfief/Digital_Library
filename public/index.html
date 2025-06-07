@@ -54,6 +54,21 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        .explainManyToMany {
+            padding-left: 45px;
+            width: fit-content;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+      .lookAtMe {
+            font-size: 30px;
+            font-weight: bold;
+            color: #00ff15;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 2px black;
+            margin: 0;
+        }
         .error {
             background-color: #f8d7da;
             color: #721c24;
@@ -102,6 +117,14 @@
         <div class="page-link">
             <h3><a href="rentals.html">Rentals Management</a></h3>
             <p>Track book rentals, returns, and availability.</p>
+        </div>
+
+        <div class="page-link">
+            <h3><a href="update_book_genres.html">Book-Genre Relationships Management</a></h3>
+            <div class="explainManyToMany">
+                <p class="lookAtMe">********</p>
+                <p class="MMDesc">Update the Many-to-Many relationship between Genres and Books.</p>
+            </div>
         </div>
     </div>
 
