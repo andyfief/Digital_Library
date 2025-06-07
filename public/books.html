@@ -186,10 +186,7 @@
             </div>
             
             <div>
-                <label for="edit_genres">Genres:</label>
-                <select id="edit_genres" name="genres" multiple>
-                    <!-- Options will be populated by JavaScript -->
-                </select>
+                <p>Please Edit Genres on the Book Genres page.</p>
             </div>
             
             <button type="submit">Update Book</button>
@@ -385,7 +382,7 @@
             console.log('[DROPDOWN] Populating genre dropdowns with', genres.length, 'genres');
             
             // Get all genre select elements
-            const genreSelects = ['genres', 'edit_genres'];
+            const genreSelects = ['genres'];
             
             genreSelects.forEach(selectId => {
                 const select = document.getElementById(selectId);
