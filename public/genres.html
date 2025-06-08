@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genres Management - Library System</title>
     <style>
+        /* Main body styling with clean font and margins */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        
+        /* Header section styling */
         header {
             margin-bottom: 20px;
         }
+        
+        /* Main heading colors */
         h1, h2 {
             color: #333;
         }
+        
+        /* Table styling with full width and collapsed borders */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -27,23 +34,33 @@
             padding: 8px;
             text-align: left;
         }
+        
+        /* Header row styling with light gray background */
         th {
             background-color: #f2f2f2;
         }
+        
+        /* Form container styling */
         form {
             max-width: 600px;
             margin-bottom: 30px;
         }
+        
+        /* Label styling with block display for vertical stacking */
         label {
             display: block;
             margin-top: 10px;
         }
+        
+        /* Input and select field styling */
         input, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             box-sizing: border-box;
         }
+        
+        /* Button styling with green theme */
         button {
             padding: 8px 16px;
             margin-top: 10px;
@@ -55,21 +72,31 @@
         button:hover {
             background-color: #45a049;
         }
+        
+        /* Action button spacing */
         .actions button {
             margin-right: 5px;
         }
+        
+        /* Navigation links styling */
         .nav-links {
             margin-bottom: 20px;
         }
+        
+        /* Books in genre section styling */
         .books-in-genre {
             margin-top: 30px;
         }
+        
+        /* Edit form container styling */
         .edit-form {
             background-color: #f9f9f9;
             padding: 20px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        
+        /* Message styling for success and error notifications */
         .message {
             padding: 10px;
             margin: 10px 0;
@@ -88,6 +115,7 @@
     </style>
 </head>
 <body>
+    <!-- Main header with navigation links -->
     <header>
         <h1>Genres Management</h1>
         <div class="nav-links">
@@ -101,11 +129,14 @@
         </div>
     </header>
 
+    <!-- Message container for displaying success/error messages -->
     <div id="message"></div>
 
+    <!-- Add new genre form section -->
     <section>
         <h2>Add New Genre</h2>
         <form id="addGenreForm">
+            <!-- Genre title input field -->
             <div>
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" required>
@@ -115,9 +146,11 @@
         </form>
     </section>
 
+    <!-- Edit existing genre form section -->
     <section>
         <h2>Edit Genre</h2>
         <form id="editGenreForm">
+            <!-- Genre selection dropdown for editing -->
             <div>
                 <label for="edit_genre_id">Genre ID:</label>
                 <select id="edit_genre_id" name="genre_id" onchange="loadGenreData()" required>
@@ -126,6 +159,7 @@
                 </select>
             </div>
             
+            <!-- Genre title input for editing -->
             <div>
                 <label for="edit_title">Title:</label>
                 <input type="text" id="edit_title" name="title" required>
@@ -136,6 +170,7 @@
         </form>
     </section>
 
+    <!-- Genres data table section -->
     <section>
         <h2>Existing Genres</h2>
         <p>This table shows all genres. Data populated with: <code>SELECT * FROM Genres;</code></p>
@@ -154,73 +189,123 @@
     </section>
 
     <script>
+        // General Citations for Genres.html Script:
+        // Ai was used to add various try/catch blocks and response checks.
+        // For example, if (!tbody) return; (populateGenresTable())
+        // This was often done with a single prompt when encountering issues after implementing a single function.
+        // An example prompt might be, "Im having trouble with this function. Add try/catch blocks and use the showMessage function or console.log()
+        // To help me debug the function."
+        // AI Source URL: https://claude.ai
+        // Citations below this may say "All my work", however, this citation should be inferred.
+
         console.log('[INIT] Genres script loaded');
         
-        // Store genres data globally for easy access
+        // global array to store genres, avoids needing to refetch from the API multiple times
         let allGenres = [];
 
+        // Citation for showMessage:
+        // This function is directly based off of the showMessage function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this showMessage function and modify it to fit my genres page. [Paste in showMessage function, Genres page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it displays messages for genre operations instead of rental operations.
+        // Displays a success or error message and disappears after 5 seconds.
         function showMessage(message, type = 'success') {
+            // log the message type and content to console for debugging
             console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            
+            // get the message display container from the DOM
             const messageDiv = document.getElementById('message');
+            
+            // inject the message with appropriate styling class (success or error)
             messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            // set a timer to automatically clear the message after 5 seconds
             setTimeout(() => {
+                // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
         }
 
+        // Citation for loadGenres:
+        // This function is directly based off of the loadRentals function in rentals.html, which was generated with AI.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this loadRentals function and modify it to fit my genres page. [Paste in loadRentals function, Genres page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads genre data instead of rental data, but AI tools were still used to generate the function that this one is derived from.
+        // gets genre data from the server and updates the UI
         async function loadGenres() {
             console.log('[LOAD] loadGenres() called');
             try {
+                // start by making a GET request to retrieve genre data
                 console.log('[LOAD] Fetching from /api/genres...');
-                const response = await fetch('/api/genres');
+                const response = await fetch('/api/genres'); // sends GET request to genres API
                 console.log('[LOAD] Response status:', response.status);
                 
+                // if the response is not OK (e.g., 404, 500), throw an error
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // Get the HTML response
+                // fetch the raw text (HTML or mixed response body)
                 const htmlResponse = await response.text();
                 console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
-                // Extract JSON from the HTML response
+                // extract JSON array string using regex, assuming it's embedded within HTML
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
+                // if no match is found, assume the response format is invalid
                 if (!jsonMatch) {
                     throw new Error('No JSON data found in response');
                 }
                 
+                // grab the matched JSON substring and parse it
                 const jsonString = jsonMatch[0];
                 console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const genres = JSON.parse(jsonString);
                 console.log('[LOAD] Parsed genres data:', genres);
                 
-                // Store genres globally
+                // store result globally to avoid re-fetching later
                 allGenres = genres;
                 
-                // Populate the table and edit dropdown
+                // refresh the genre display and dropdown with latest data
                 populateGenresTable(genres);
                 populateEditDropdown(genres);
                 
                 console.log(`[LOAD] Successfully loaded ${genres.length} genres`);
                 
             } catch (error) {
+                // catch network or JSON parse errors and inform the user
                 console.error('[LOAD] Error in loadGenres:', error);
                 showMessage('Error loading genres: ' + error.message, 'error');
             }
         }
 
+        // Citation for populateGenresTable:
+        // This function is directly based off of the populateRentalsTable function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this populateRentalsTable function and modify it to fit my genres table. [Paste in populateRentalsTable, Genres ddl section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates a genre table instead of rental table, with different column data.
+        // populates the genre table with data passed to it
         function populateGenresTable(genres) {
             console.log('[TABLE] Populating genres table with', genres.length, 'genres');
+            
+            // get reference to the table body element where we'll insert rows
             const tbody = document.getElementById('genresTableBody');
             if (!tbody) {
                 console.error('[TABLE] Could not find genresTableBody');
-                return;
+                return; // exit early if table body doesn't exist
             }
             
+            // remove any existing rows to start fresh
             tbody.innerHTML = '';
             
+            // handle the case where no genres are returned from the API
             if (genres.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -229,14 +314,18 @@
                         </td>
                     </tr>
                 `;
-                return;
+                return; // exit since there's nothing more to do
             }
             
-            // Create table rows for each genre
+            // iterate through each genre and create a table row
             genres.forEach((genre, index) => {
                 console.log(`[TABLE] Processing genre ${index + 1}:`, genre);
+                
+                // create a new table row element
                 const row = document.createElement('tr');
                 
+                // build the HTML content for this row with genre data
+                // use fallback values ('N/A') if any genre properties are missing
                 row.innerHTML = `
                     <td>${genre.genre_id || 'N/A'}</td>
                     <td>${genre.title || 'N/A'}</td>
@@ -244,193 +333,333 @@
                         <button class="delete-btn" onclick="deleteGenre(${genre.genre_id})">Delete</button>
                     </td>
                 `;
+                
+                // add the completed row to the table body
                 tbody.appendChild(row);
             });
             
             console.log(`[TABLE] Successfully populated table with ${genres.length} genres`);
         }
 
+        // Citation for populateEditDropdown:
+        // This function is directly based off of the populateEditDropdown function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this populateEditDropdown function and modify it to fit my genres dropdown. [Paste in populateEditDropdown function, Genres dropdown section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates a genre dropdown instead of rental dropdown.
+        // fills a dropdown in the edit form with available genres
         function populateEditDropdown(genres) {
             console.log('[DROPDOWN] Populating edit dropdown with', genres.length, 'genres');
+            
+            // get reference to the dropdown select element
             const select = document.getElementById('edit_genre_id');
             if (!select) {
                 console.error('[DROPDOWN] Could not find edit_genre_id select');
-                return;
+                return; // exit if dropdown element doesn't exist
             }
             
-            // Clear existing options except the first one
+            // reset the dropdown with just the default "select one" option
             select.innerHTML = '<option value="">Select Genre to Edit</option>';
             
+            // add each genre as a selectable option in the dropdown
             genres.forEach(genre => {
+                // create a new option element for this genre
                 const option = document.createElement('option');
+                
+                // set the option's value to the genre ID (what gets submitted)
                 option.value = genre.genre_id;
+                
+                // set the display text to show both ID and title for clarity
                 option.textContent = `${genre.genre_id} - ${genre.title}`;
+                
+                // add this option to the dropdown
                 select.appendChild(option);
             });
             
             console.log('[DROPDOWN] Successfully populated dropdown');
         }
 
+        // Citation for loadGenreData:
+        // This function is directly based off of the loadRentalData function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this loadRentalData function and modify it to fit my genres form. [Paste in loadRentalData function, Genres form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads genre form data instead of rental form data, and doesn't require date parsing.
+        // loads genre details into the form fields when selected from dropdown
         function loadGenreData() {
             console.log('[EDIT] loadGenreData() called');
+            
+            // get the dropdown element and its currently selected value
             const select = document.getElementById('edit_genre_id');
             const genreId = select.value;
             
             console.log('[EDIT] Selected genre ID:', genreId);
             
+            // if no genre is selected, clear the form and exit
             if (!genreId) {
                 console.log('[EDIT] No genre selected, clearing form');
-                clearEditForm();
+                clearEditForm(); // reset all form fields
                 return;
             }
             
-            // Find the genre in our stored data
+            // search through our cached genre data to find the selected genre
+            // use == instead of === to handle string/number comparison
             const genre = allGenres.find(g => g.genre_id == genreId);
             console.log('[EDIT] Found genre data:', genre);
             
+            // handle case where genre data isn't found in our cache
             if (!genre) {
                 console.error('[EDIT] Genre not found in stored data');
                 showMessage('Genre data not found', 'error');
                 return;
             }
             
-            // Populate the form fields
+            // populate the edit form fields with the selected genre's current data
+            // use fallback empty strings if any properties are missing
             document.getElementById('edit_title').value = genre.title || '';
             
             console.log('[EDIT] Form populated with genre data');
         }
 
+        // Citation for deleteGenre function:
+        // This function is directly based off of the deleteRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this deleteRental function and modify it to fit my genres deletion. [Paste in deleteRental function, Genres deletion section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it deletes a genre instead of a rental.
+        // sends a DELETE request to remove a genre
         async function deleteGenre(genreId) {
             console.log('[DELETE] deleteGenre called for ID:', genreId);
+            
+            // show confirmation dialog to prevent accidental deletions
             if (confirm(`Are you sure you want to delete genre ${genreId}?`)) {
                 try {
                     console.log('[DELETE] Sending DELETE request for genre:', genreId);
+                    
+                    // make HTTP DELETE request to the specific genre endpoint
                     const response = await fetch(`/api/genres/${genreId}`, {
                         method: 'DELETE'
                     });
                     
                     console.log('[DELETE] Response status:', response.status);
+                    
+                    // parse the JSON response from the server
                     const result = await response.json();
                     console.log('[DELETE] Response data:', result);
                     
+                    // check if the deletion was successful
                     if (response.ok) {
                         console.log('[DELETE] Genre deleted successfully');
+                        
+                        // show success message to user
                         showMessage(result.message || 'Genre deleted successfully', 'success');
-                        loadGenres(); // Reload the table
+                        
+                        // refresh the genre list to reflect the deletion
+                        loadGenres(); // refresh data after deletion
                     } else {
+                        // handle server-side errors (genre not found, etc.)
                         console.error('[DELETE] Error deleting genre:', result.error);
                         showMessage(result.error || 'Error deleting genre', 'error');
                     }
                 } catch (error) {
+                    // handle network errors or other client-side issues
                     console.error('[DELETE] Error deleting genre:', error);
                     showMessage('Error deleting genre: ' + error.message, 'error');
                 }
-            }
+            } // if user cancels confirmation, nothing happens
         }
 
+        // Citation for createGenre function:
+        // This function is directly based off of the createRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this createRental function and modify it to fit my genres creation. [Paste in createRental function, Genres creation section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it creates a genre instead of a rental.
+        // sends a POST request to create a new genre
         async function createGenre(formData) {
             console.log('[CREATE] createGenre called with data:', formData);
             try {
                 console.log('[CREATE] Sending POST request to /api/genres');
+                
+                // make HTTP POST request to create a new genre
                 const response = await fetch('/api/genres', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // tell server we're sending JSON
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData) // convert JavaScript object to JSON string
                 });
                 
                 console.log('[CREATE] Response status:', response.status);
+                
+                // parse the server's JSON response
                 const result = await response.json();
                 console.log('[CREATE] Response data:', result);
                 
+                // check if genre creation was successful
                 if (response.ok) {
                     console.log('[CREATE] Genre created successfully:', result.message);
+                    
+                    // show success message to user
                     showMessage(result.message || 'Genre created successfully', 'success');
-                    document.getElementById('addGenreForm').reset();
-                    loadGenres(); // Reload the table
+                    
+                    // clear the add genre form to prepare for next entry
+                    document.getElementById('addGenreForm').reset(); // clear form
+                    
+                    // refresh the genre list to show the new genre
+                    loadGenres(); // refresh data
                 } else {
+                    // handle server-side validation errors or other issues
                     console.error('[CREATE] Error creating genre:', result.error);
                     showMessage(result.error || 'Error creating genre', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[CREATE] Error creating genre:', error);
                 showMessage('Error creating genre: ' + error.message, 'error');
             }
         }
 
+        // Citation for updateGenre:
+        // This function is directly based off of the updateRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the genres function.
+        // Prompt: Take this updateRental function and modify it to fit my genres updating. [Paste in updateRental function, Genres updating section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it updates a genre instead of a rental.
+        // sends a PUT request to update an existing genre
         async function updateGenre(genreId, formData) {
             console.log('[UPDATE] updateGenre called for ID:', genreId, 'with data:', formData);
             try {
                 console.log('[UPDATE] Sending PUT request to /api/genres/' + genreId);
+                
+                // make HTTP PUT request to update the specific genre
                 const response = await fetch(`/api/genres/${genreId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // specify we're sending JSON data
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData) // convert form data to JSON string
                 });
                 
                 console.log('[UPDATE] Response status:', response.status);
+                
+                // parse the server's response
                 const result = await response.json();
                 console.log('[UPDATE] Response data:', result);
                 
+                // check if the update was successful
                 if (response.ok) {
                     console.log('[UPDATE] Genre updated successfully:', result.message);
+                    
+                    // show success message to user
                     showMessage(result.message || 'Genre updated successfully', 'success');
+                    
+                    // clear the edit form since update is complete
                     clearEditForm();
-                    loadGenres(); // Reload the table
+                    
+                    // refresh the genre list to show updated information
+                    loadGenres(); // refresh data
                 } else {
+                    // handle server-side validation errors or genre not found
                     console.error('[UPDATE] Error updating genre:', result.error);
                     showMessage(result.error || 'Error updating genre', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[UPDATE] Error updating genre:', error);
                 showMessage('Error updating genre: ' + error.message, 'error');
             }
         }
 
+        // Citation for clearEditForm:
+        // AI was used to help me reset the html form.
+        // Prompt used: "How do I reset an HTML form in the same file's javascript <script>?""
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // clears all fields in the edit form by resetting it
         function clearEditForm() {
             console.log('[EDIT] Clearing edit form');
             document.getElementById('editGenreForm').reset();
         }
 
+        // Citation for addGenreForm event listener:
+        // This event listener is directly based off of the createRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the genres event listener.
+        // Prompt: Take this createRentalForm event listener and modify it to fit my genres form. [Paste in createRentalForm event listener, Genres form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // event listener for add genre form submission
         document.getElementById('addGenreForm').addEventListener('submit', function(e) {
             console.log('[FORM] Add genre form submitted');
-            e.preventDefault();
             
+            // prevent the browser's default form submission behavior (page reload)
+            e.preventDefault(); // prevent default form behavior (page reload)
+            
+            // extract data from the form using FormData API
             const formData = new FormData(this);
+            
+            // build a clean JavaScript object with the form data
+            // get values from named form fields
             const genreData = {
-                title: formData.get('title')
+                title: formData.get('title') // get the title input value
             };
             
             console.log('[FORM] Parsed add genre data:', genreData);
+            
+            // call the createGenre function with the collected data
             createGenre(genreData);
         });
 
+        // Citation for editGenreForm event listener:
+        // This event listener is directly based off of the editRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the genres event listener.
+        // Prompt: Take this editRentalForm event listener and modify it to fit my genres form. [Paste in editRentalForm event listener, Genres form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // event listener for edit genre form submission
         document.getElementById('editGenreForm').addEventListener('submit', function(e) {
             console.log('[FORM] Edit genre form submitted');
+            
+            // prevent default browser form submission behavior
             e.preventDefault();
             
+            // extract data from the edit form
             const formData = new FormData(this);
             const genreId = formData.get('genre_id');
             
             console.log('[FORM] Selected genre ID for edit:', genreId);
             
+            // validate that a genre has been selected for editing
             if (!genreId) {
                 console.error('[FORM] No genre selected for edit');
                 showMessage('Please select a genre to edit', 'error');
                 return;
             }
             
+            // extract all form data and prepare the payload for update
             const genreData = {
-                title: formData.get('title')
+                title: formData.get('title') // get the updated title
             };
             
             console.log('[FORM] Parsed edit genre data:', genreData);
+            
+            // call the updateGenre function with the ID and data
             updateGenre(genreId, genreData);
         });
 
+        // Citation for DOMContentLoaded Event listener:
+        // This is directly based off of the DOMContentLoaded event listener in rentals.html, which was based on MDN Web Docs - "DOMContentLoaded" event usage pattern
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
+        // when the page finishes loading, trigger genre data loading
         document.addEventListener('DOMContentLoaded', function() {
             console.log('[INIT] Page loaded, ready to load genres');
             loadGenres();

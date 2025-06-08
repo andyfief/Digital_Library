@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Users Management - Library System</title>
     <style>
+        /* Main body styling with clean font and margins */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        
+        /* Header section styling */
         header {
             margin-bottom: 20px;
         }
+        
+        /* Main heading colors */
         h1, h2 {
             color: #333;
         }
+        
+        /* Table styling with full width and collapsed borders */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -27,23 +34,33 @@
             padding: 8px;
             text-align: left;
         }
+        
+        /* Header row styling with light gray background */
         th {
             background-color: #f2f2f2;
         }
+        
+        /* Form container styling */
         form {
             max-width: 600px;
             margin-bottom: 30px;
         }
+        
+        /* Label styling with block display for vertical stacking */
         label {
             display: block;
             margin-top: 10px;
         }
+        
+        /* Input and select field styling */
         input, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             box-sizing: border-box;
         }
+        
+        /* Button styling with green theme */
         button {
             padding: 8px 16px;
             margin-top: 10px;
@@ -55,18 +72,26 @@
         button:hover {
             background-color: #45a049;
         }
+        
+        /* Action button spacing */
         .actions button {
             margin-right: 5px;
         }
+        
+        /* Navigation links styling */
         .nav-links {
             margin-bottom: 20px;
         }
+        
+        /* Edit form container styling */
         .edit-form {
             background-color: #f9f9f9;
             padding: 20px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        
+        /* Message styling for success and error notifications */
         .message {
             padding: 10px;
             margin: 10px 0;
@@ -85,6 +110,7 @@
     </style>
 </head>
 <body>
+    <!-- Main header with navigation links -->
     <header>
         <h1>Users Management</h1>
         <div class="nav-links">
@@ -98,21 +124,26 @@
         </div>
     </header>
 
+    <!-- Message container for displaying success/error messages -->
     <div id="message"></div>
 
+    <!-- Add new user form section -->
     <section>
         <h2>Add New User</h2>
         <form id="addUserForm">
+            <!-- Username input field -->
             <div>
                 <label for="username">Username:</label>
                 <input type="text" id="username" name="username" required>
             </div>
             
+            <!-- Email input field -->
             <div>
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
             </div>
             
+            <!-- Password input field -->
             <div>
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
@@ -122,9 +153,11 @@
         </form>
     </section>
 
+    <!-- Edit existing user form section -->
     <section>
         <h2>Edit User</h2>
         <form id="editUserForm">
+            <!-- User selection dropdown for editing -->
             <div>
                 <label for="edit_user_id">User ID:</label>
                 <select id="edit_user_id" name="user_id" onchange="loadUserData()" required>
@@ -133,16 +166,19 @@
                 </select>
             </div>
             
+            <!-- Username input for editing -->
             <div>
                 <label for="edit_username">Username:</label>
                 <input type="text" id="edit_username" name="username" required>
             </div>
             
+            <!-- Email input for editing -->
             <div>
                 <label for="edit_email">Email:</label>
                 <input type="email" id="edit_email" name="email" required>
             </div>
             
+            <!-- Password input for editing (optional) -->
             <div>
                 <label for="edit_password">Password (leave blank to keep current):</label>
                 <input type="password" id="edit_password" name="password" placeholder="Leave blank to keep current password">
@@ -153,6 +189,7 @@
         </form>
     </section>
 
+    <!-- Users data table section -->
     <section>
         <h2>Existing Users</h2>
         <p>This table shows all users. Data populated with: <code>SELECT * FROM Users;</code></p>
@@ -172,63 +209,102 @@
     </section>
 
     <script>
+        // General Citations for Users.html Script:
+        // Ai was used to add various try/catch blocks and response checks.
+        // For example, if (!tbody) return; (populateUsersTable())
+        // This was often done with a single prompt when encountering issues after implementing a single function.
+        // An example prompt might be, "Im having trouble with this function. Add try/catch blocks and use the showMessage function or console.log()
+        // To help me debug the function."
+        // AI Source URL: https://claude.ai
+        // Citations below this may say "All my work", however, this citation should be inferred.
+
         console.log('[INIT] Users script loaded');
         
-        // Store users data globally for easy access
+        // global array to store users, avoids needing to refetch from the API multiple times
         let allUsers = [];
 
+        // Citation for showMessage:
+        // This function is directly based off of the showMessage function in rentals.html, which is all my own work.
+        // Displays a success or error message and disappears after 5 seconds.
         function showMessage(message, type = 'success') {
+            // log the message type and content to console for debugging
             console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            
+            // get the message display container from the DOM
             const messageDiv = document.getElementById('message');
+            
+            // inject the message with appropriate styling class (success or error)
             messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            // set a timer to automatically clear the message after 5 seconds
             setTimeout(() => {
+                // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
         }
 
+        // Citation for loadUsers:
+        // This function is directly based off of the loadRentals function in rentals.html, which was generated with AI.
+        // This function differs in the sense that it loads user data instead of rental data, but AI tools were still used to generate the function that this one is derived from.
+        // Date: 5/2025
+        // Prompts used to help generate loadRentals function (which this is based on):
+        // I'm getting this response from my API, and it has html within it and im having trouble parsing it. Heres the current response:
+        // I need this data to be displayed, so i need it on its own.
+        // AI Source URL: https://claude.ai
+        // gets user data from the server and updates the UI
         async function loadUsers() {
             console.log('[LOAD] loadUsers() called');
             try {
+                // start by making a GET request to retrieve user data
                 console.log('[LOAD] Fetching from /api/users...');
-                const response = await fetch('/api/users');
+                const response = await fetch('/api/users'); // sends GET request to users API
                 console.log('[LOAD] Response status:', response.status);
                 
+                // if the response is not OK (e.g., 404, 500), throw an error
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // Get the HTML response
+                // fetch the raw text (HTML or mixed response body)
                 const htmlResponse = await response.text();
                 console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
-                // Extract JSON from the HTML response
+                // extract JSON array string using regex, assuming it's embedded within HTML
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
+                // if no match is found, assume the response format is invalid
                 if (!jsonMatch) {
                     throw new Error('No JSON data found in response');
                 }
                 
+                // grab the matched JSON substring and parse it
                 const jsonString = jsonMatch[0];
                 console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const users = JSON.parse(jsonString);
                 console.log('[LOAD] Parsed users data:', users);
                 
-                // Store users globally
+                // store result globally to avoid re-fetching later
                 allUsers = users;
                 
-                // Populate the table and edit dropdown
+                // refresh the user display and dropdown with latest data
                 populateUsersTable(users);
                 populateEditDropdown(users);
                 
                 console.log(`[LOAD] Successfully loaded ${users.length} users`);
                 
             } catch (error) {
+                // catch network or JSON parse errors and inform the user
                 console.error('[LOAD] Error in loadUsers:', error);
                 showMessage('Error loading users: ' + error.message, 'error');
             }
         }
 
+
+        // Citation for populateUsersTable:
+        // This function is directly based off of the populateRentalsTable function in rentals.html, which is all my own work.
+        // This function differs in the sense that it populates a user table instead of rental table, with different column data.
+        // populates the user table with data passed to it
         function populateUsersTable(users) {
             console.log('[TABLE] Populating users table with', users.length, 'users');
             const tbody = document.getElementById('usersTableBody');
@@ -237,8 +313,10 @@
                 return;
             }
             
+            // clear any previously displayed rows before adding new ones
             tbody.innerHTML = '';
             
+            // if the users array is empty, show a placeholder row with message
             if (users.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -250,11 +328,12 @@
                 return;
             }
             
-            // Create table rows for each user
+            // otherwise loop through all users and create a table row for each
             users.forEach((user, index) => {
                 console.log(`[TABLE] Processing user ${index + 1}:`, user);
                 const row = document.createElement('tr');
                 
+                // use nullish fallback ('N/A') to handle any missing fields
                 row.innerHTML = `
                     <td>${user.user_id || 'N/A'}</td>
                     <td>${user.username || 'N/A'}</td>
@@ -263,12 +342,16 @@
                         <button class="delete-btn" onclick="deleteUser(${user.user_id})">Delete</button>
                     </td>
                 `;
-                tbody.appendChild(row);
+                tbody.appendChild(row); // add the row to the table
             });
             
             console.log(`[TABLE] Successfully populated table with ${users.length} users`);
         }
 
+        // Citation for populateEditDropdown:
+        // This function is directly based off of the populateEditDropdown function in rentals.html, which is all my own work.
+        // This function differs in the sense that it populates a user dropdown instead of rental dropdown.
+        // fills a dropdown in the edit form with available users
         function populateEditDropdown(users) {
             console.log('[DROPDOWN] Populating edit dropdown with', users.length, 'users');
             const select = document.getElementById('edit_user_id');
@@ -277,19 +360,24 @@
                 return;
             }
             
-            // Clear existing options except the first one
+            // reset the dropdown to just have the default prompt
             select.innerHTML = '<option value="">Select User to Edit</option>';
             
+            // iterate through users and create an <option> for each
             users.forEach(user => {
                 const option = document.createElement('option');
-                option.value = user.user_id;
-                option.textContent = `${user.user_id} - ${user.username}`;
+                option.value = user.user_id; // set option value as user ID
+                option.textContent = `${user.user_id} - ${user.username}`; // display ID and name
                 select.appendChild(option);
             });
             
             console.log('[DROPDOWN] Successfully populated dropdown');
         }
 
+        // Citation for loadUserData:
+        // This function is directly based off of the loadRentalData function in rentals.html, which is all my own work.
+        // This function differs in the sense that it loads user form data instead of rental form data, but doesn't require date parsing.
+        // loads user details into the form fields when selected from dropdown
         function loadUserData() {
             console.log('[EDIT] loadUserData() called');
             const select = document.getElementById('edit_user_id');
@@ -297,13 +385,14 @@
             
             console.log('[EDIT] Selected user ID:', userId);
             
+            // if nothing selected, clear the form and return
             if (!userId) {
                 console.log('[EDIT] No user selected, clearing form');
                 clearEditForm();
                 return;
             }
             
-            // Find the user in our stored data
+            // locate the selected user from our cached list
             const user = allUsers.find(u => u.user_id == userId);
             console.log('[EDIT] Found user data:', user);
             
@@ -313,18 +402,24 @@
                 return;
             }
             
-            // Populate the form fields (don't populate password for security)
+            // update form fields with user's current values (don't populate password for security)
             document.getElementById('edit_username').value = user.username || '';
             document.getElementById('edit_email').value = user.email || '';
-            document.getElementById('edit_password').value = ''; // Always leave password blank
+            document.getElementById('edit_password').value = ''; // always leave password blank for security
             
             console.log('[EDIT] Form populated with user data');
         }
 
+        // Citation for deleteUser function:
+        // This function is directly based off of the deleteRental function in rentals.html, which is all my own work.
+        // This function differs in the sense that it deletes a user instead of a rental.
+        // sends a DELETE request to remove a user
         async function deleteUser(userId) {
             console.log('[DELETE] deleteUser called for ID:', userId);
+            // ask for confirmation before permanently deleting a user
             if (confirm(`Are you sure you want to delete user ${userId}?`)) {
                 try {
+                    // make DELETE request to backend endpoint for the user
                     console.log('[DELETE] Sending DELETE request for user:', userId);
                     const response = await fetch(`/api/users/${userId}`, {
                         method: 'DELETE'
@@ -334,24 +429,32 @@
                     const result = await response.json();
                     console.log('[DELETE] Response data:', result);
                     
+                    // if the request succeeded, show a message and reload table
                     if (response.ok) {
                         console.log('[DELETE] User deleted successfully');
                         showMessage(result.message || 'User deleted successfully', 'success');
-                        loadUsers(); // Reload the table
+                        loadUsers(); // re-fetch updated user list
                     } else {
+                        // display error returned by server
                         console.error('[DELETE] Error deleting user:', result.error);
                         showMessage(result.error || 'Error deleting user', 'error');
                     }
                 } catch (error) {
+                    // handle network or parsing issues
                     console.error('[DELETE] Error deleting user:', error);
                     showMessage('Error deleting user: ' + error.message, 'error');
                 }
             }
         }
 
+        // Citation for createUser function:
+        // This function is directly based off of the createRental function in rentals.html, which is all my own work.
+        // This function differs in the sense that it creates a user instead of a rental.
+        // sends a POST request to create a new user
         async function createUser(formData) {
             console.log('[CREATE] createUser called with data:', formData);
             try {
+                // make a POST request to the user creation endpoint
                 console.log('[CREATE] Sending POST request to /api/users');
                 const response = await fetch('/api/users', {
                     method: 'POST',
@@ -365,24 +468,32 @@
                 const result = await response.json();
                 console.log('[CREATE] Response data:', result);
                 
+                // if user was created successfully, reset form and reload table
                 if (response.ok) {
                     console.log('[CREATE] User created successfully:', result.message);
                     showMessage(result.message || 'User created successfully', 'success');
-                    document.getElementById('addUserForm').reset();
-                    loadUsers(); // Reload the table
+                    document.getElementById('addUserForm').reset(); // clear form
+                    loadUsers(); // refresh table with new user
                 } else {
+                    // if backend returned error, display it
                     console.error('[CREATE] Error creating user:', result.error);
                     showMessage(result.error || 'Error creating user', 'error');
                 }
             } catch (error) {
+                // log and display any unexpected errors
                 console.error('[CREATE] Error creating user:', error);
                 showMessage('Error creating user: ' + error.message, 'error');
             }
         }
 
+        // Citation for updateUser:
+        // This function is directly based off of the updateRental function in rentals.html, which is all my own work.
+        // This function differs in the sense that it updates a user instead of a rental.
+        // sends a PUT request to update an existing user
         async function updateUser(userId, formData) {
             console.log('[UPDATE] updateUser called for ID:', userId, 'with data:', formData);
             try {
+                // make a PUT request to update user with given ID
                 console.log('[UPDATE] Sending PUT request to /api/users/' + userId);
                 const response = await fetch(`/api/users/${userId}`, {
                     method: 'PUT',
@@ -396,31 +507,50 @@
                 const result = await response.json();
                 console.log('[UPDATE] Response data:', result);
                 
+                // if update was successful, notify and refresh UI
                 if (response.ok) {
                     console.log('[UPDATE] User updated successfully:', result.message);
                     showMessage(result.message || 'User updated successfully', 'success');
-                    clearEditForm();
-                    loadUsers(); // Reload the table
+                    clearEditForm(); // reset form fields
+                    loadUsers(); // reload user table
                 } else {
+                    // show backend-reported error
                     console.error('[UPDATE] Error updating user:', result.error);
                     showMessage(result.error || 'Error updating user', 'error');
                 }
             } catch (error) {
+                // catch fetch/parsing/network issues
                 console.error('[UPDATE] Error updating user:', error);
                 showMessage('Error updating user: ' + error.message, 'error');
             }
         }
 
+        // Citation for clearEditForm:
+        // This function is directly based off of the clearEditForm function in rentals.html, which was generated with AI help.
+        // AI was used to help me reset the html form.
+        // Prompt used: "How do I reset an HTML form in the same file's javascript <script>?""
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // clears all fields in the edit form by resetting it
         function clearEditForm() {
             console.log('[EDIT] Clearing edit form');
             document.getElementById('editUserForm').reset();
         }
 
+        // Citation for addUserForm event listener:
+        // This event listener is directly based off of the createRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // event listener for add user form submission
         document.getElementById('addUserForm').addEventListener('submit', function(e) {
             console.log('[FORM] Add user form submitted');
-            e.preventDefault();
+            e.preventDefault(); // prevent default form behavior (page reload)
             
             const formData = new FormData(this);
+            
+            // assemble user data from form inputs
             const userData = {
                 username: formData.get('username'),
                 email: formData.get('email'),
@@ -431,6 +561,13 @@
             createUser(userData);
         });
 
+        // Citation for editUserForm event listener:
+        // This event listener is directly based off of the editRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // event listener for edit user form submission
         document.getElementById('editUserForm').addEventListener('submit', function(e) {
             console.log('[FORM] Edit user form submitted');
             e.preventDefault();
@@ -446,16 +583,21 @@
                 return;
             }
             
+            // extract all form data and prepare the payload for update
             const userData = {
                 username: formData.get('username'),
                 email: formData.get('email'),
-                password: formData.get('password') || null // Send null if password is empty
+                password: formData.get('password') || null // send null if password is empty
             };
             
             console.log('[FORM] Parsed edit user data:', userData);
             updateUser(userId, userData);
         });
 
+        // Citation for DOMContentLoaded Event listener:
+        // This is directly based off of the DOMContentLoaded event listener in rentals.html, which was based on MDN Web Docs - "DOMContentLoaded" event usage pattern
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
+        // when the page finishes loading, trigger user data loading
         document.addEventListener('DOMContentLoaded', function() {
             console.log('[INIT] Page loaded, ready to load users');
             loadUsers();

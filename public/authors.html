@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authors Management - Library System</title>
     <style>
+        /* Main body styling with clean font and margins */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        
+        /* Header section styling */
         header {
             margin-bottom: 20px;
         }
+        
+        /* Main heading colors */
         h1, h2 {
             color: #333;
         }
+        
+        /* Table styling with full width and collapsed borders */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -27,23 +34,33 @@
             padding: 8px;
             text-align: left;
         }
+        
+        /* Header row styling with light gray background */
         th {
             background-color: #f2f2f2;
         }
+        
+        /* Form container styling */
         form {
             max-width: 600px;
             margin-bottom: 30px;
         }
+        
+        /* Label styling with block display for vertical stacking */
         label {
             display: block;
             margin-top: 10px;
         }
+        
+        /* Input, textarea, and select field styling */
         input, textarea, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             box-sizing: border-box;
         }
+        
+        /* Button styling with green theme */
         button {
             padding: 8px 16px;
             margin-top: 10px;
@@ -55,18 +72,26 @@
         button:hover {
             background-color: #45a049;
         }
+        
+        /* Action button spacing */
         .actions button {
             margin-right: 5px;
         }
+        
+        /* Navigation links styling */
         .nav-links {
             margin-bottom: 20px;
         }
+        
+        /* Edit form container styling */
         .edit-form {
             background-color: #f9f9f9;
             padding: 20px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        
+        /* Message styling for success and error notifications */
         .message {
             padding: 10px;
             margin: 10px 0;
@@ -85,6 +110,7 @@
     </style>
 </head>
 <body>
+    <!-- Main header with navigation links -->
     <header>
         <h1>Authors Management</h1>
         <div class="nav-links">
@@ -98,16 +124,20 @@
         </div>
     </header>
 
+    <!-- Message container for displaying success/error messages -->
     <div id="message"></div>
 
+    <!-- Add new author form section -->
     <section>
         <h2>Add New Author</h2>
         <form id="addAuthorForm">
+            <!-- Author name input field -->
             <div>
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required>
             </div>
             
+            <!-- Author biography textarea field -->
             <div>
                 <label for="bio">Biography:</label>
                 <textarea id="bio" name="bio" rows="4"></textarea>
@@ -117,9 +147,11 @@
         </form>
     </section>
 
+    <!-- Edit existing author form section -->
     <section>
         <h2>Edit Author</h2>
         <form id="editAuthorForm">
+            <!-- Author selection dropdown for editing -->
             <div>
                 <label for="edit_author_id">Author ID:</label>
                 <select id="edit_author_id" name="author_id" onchange="loadAuthorData()" required>
@@ -128,11 +160,13 @@
                 </select>
             </div>
             
+            <!-- Author name input for editing -->
             <div>
                 <label for="edit_name">Name:</label>
                 <input type="text" id="edit_name" name="name" required>
             </div>
             
+            <!-- Author biography textarea for editing -->
             <div>
                 <label for="edit_bio">Biography:</label>
                 <textarea id="edit_bio" name="bio" rows="4"></textarea>
@@ -143,6 +177,7 @@
         </form>
     </section>
 
+    <!-- Authors data table section -->
     <section>
         <h2>Existing Authors</h2>
         <p>This table shows All authors. Data populated with: <code>SELECT * FROM Authors;</code></p>
@@ -162,73 +197,123 @@
     </section>
 
     <script>
+        // General Citations for Authors.html Script:
+        // Ai was used to add various try/catch blocks and response checks.
+        // For example, if (!tbody) return; (populateAuthorsTable())
+        // This was often done with a single prompt when encountering issues after implementing a single function.
+        // An example prompt might be, "Im having trouble with this function. Add try/catch blocks and use the showMessage function or console.log()
+        // To help me debug the function."
+        // AI Source URL: https://claude.ai
+        // Citations below this may say "All my work", however, this citation should be inferred.
+
         console.log('[INIT] Authors script loaded');
         
-        // Store authors data globally for easy access
+        // global array to store authors, avoids needing to refetch from the API multiple times
         let allAuthors = [];
 
+        // Citation for showMessage:
+        // This function is directly based off of the showMessage function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this showMessage function and modify it to fit my authors page. [Paste in showMessage function, Authors page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it displays messages for author operations instead of rental operations.
+        // Displays a success or error message and disappears after 5 seconds.
         function showMessage(message, type = 'success') {
+            // log the message type and content to console for debugging
             console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            
+            // get the message display container from the DOM
             const messageDiv = document.getElementById('message');
+            
+            // inject the message with appropriate styling class (success or error)
             messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            // set a timer to automatically clear the message after 5 seconds
             setTimeout(() => {
+                // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
         }
 
+        // Citation for loadAuthors:
+        // This function is directly based off of the loadRentals function in rentals.html, which was generated with AI.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this loadRentals function and modify it to fit my authors page. [Paste in loadRentals function, Authors page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads author data instead of rental data, but AI tools were still used to generate the function that this one is derived from.
+        // gets author data from the server and updates the UI
         async function loadAuthors() {
             console.log('[LOAD] loadAuthors() called');
             try {
+                // start by making a GET request to retrieve author data
                 console.log('[LOAD] Fetching from /api/authors...');
-                const response = await fetch('/api/authors');
+                const response = await fetch('/api/authors'); // sends GET request to authors API
                 console.log('[LOAD] Response status:', response.status);
                 
+                // if the response is not OK (e.g., 404, 500), throw an error
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // Get the HTML response
+                // fetch the raw text (HTML or mixed response body)
                 const htmlResponse = await response.text();
                 console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
-                // Extract JSON from the HTML response
+                // extract JSON array string using regex, assuming it's embedded within HTML
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
+                // if no match is found, assume the response format is invalid
                 if (!jsonMatch) {
                     throw new Error('No JSON data found in response');
                 }
                 
+                // grab the matched JSON substring and parse it
                 const jsonString = jsonMatch[0];
                 console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const authors = JSON.parse(jsonString);
                 console.log('[LOAD] Parsed authors data:', authors);
                 
-                // Store authors globally
+                // store result globally to avoid re-fetching later
                 allAuthors = authors;
                 
-                // Populate the table and edit dropdown
+                // refresh the author display and dropdown with latest data
                 populateAuthorsTable(authors);
                 populateEditDropdown(authors);
                 
                 console.log(`[LOAD] Successfully loaded ${authors.length} authors`);
                 
             } catch (error) {
+                // catch network or JSON parse errors and inform the user
                 console.error('[LOAD] Error in loadAuthors:', error);
                 showMessage('Error loading authors: ' + error.message, 'error');
             }
         }
 
+        // Citation for populateAuthorsTable:
+        // This function is directly based off of the populateRentalsTable function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this populateRentalsTable function and modify it to fit my authors table. [Paste in populateRentalsTable, Authors ddl section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates an author table instead of rental table, with different column data.
+        // populates the author table with data passed to it
         function populateAuthorsTable(authors) {
             console.log('[TABLE] Populating authors table with', authors.length, 'authors');
+            
+            // get reference to the table body element where we'll insert rows
             const tbody = document.getElementById('authorsTableBody');
             if (!tbody) {
                 console.error('[TABLE] Could not find authorsTableBody');
-                return;
+                return; // exit early if table body doesn't exist
             }
             
+            // remove any existing rows to start fresh
             tbody.innerHTML = '';
             
+            // handle the case where no authors are returned from the API
             if (authors.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -237,14 +322,18 @@
                         </td>
                     </tr>
                 `;
-                return;
+                return; // exit since there's nothing more to do
             }
             
-            // Create table rows for each author
+            // iterate through each author and create a table row
             authors.forEach((author, index) => {
                 console.log(`[TABLE] Processing author ${index + 1}:`, author);
+                
+                // create a new table row element
                 const row = document.createElement('tr');
                 
+                // build the HTML content for this row with author data
+                // use fallback values ('N/A') if any author properties are missing
                 row.innerHTML = `
                     <td>${author.author_id || 'N/A'}</td>
                     <td>${author.name || 'N/A'}</td>
@@ -253,196 +342,336 @@
                         <button class="delete-btn" onclick="deleteAuthor(${author.author_id})">Delete</button>
                     </td>
                 `;
+                
+                // add the completed row to the table body
                 tbody.appendChild(row);
             });
             
             console.log(`[TABLE] Successfully populated table with ${authors.length} authors`);
         }
 
+        // Citation for populateEditDropdown:
+        // This function is directly based off of the populateEditDropdown function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this populateEditDropdown function and modify it to fit my authors dropdown. [Paste in populateEditDropdown function, Authors dropdown section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates an author dropdown instead of rental dropdown.
+        // fills a dropdown in the edit form with available authors
         function populateEditDropdown(authors) {
             console.log('[DROPDOWN] Populating edit dropdown with', authors.length, 'authors');
+            
+            // get reference to the dropdown select element
             const select = document.getElementById('edit_author_id');
             if (!select) {
                 console.error('[DROPDOWN] Could not find edit_author_id select');
-                return;
+                return; // exit if dropdown element doesn't exist
             }
             
-            // Clear existing options except the first one
+            // reset the dropdown with just the default "select one" option
             select.innerHTML = '<option value="">Select Author to Edit</option>';
             
+            // add each author as a selectable option in the dropdown
             authors.forEach(author => {
+                // create a new option element for this author
                 const option = document.createElement('option');
+                
+                // set the option's value to the author ID (what gets submitted)
                 option.value = author.author_id;
+                
+                // set the display text to show both ID and name for clarity
                 option.textContent = `${author.author_id} - ${author.name}`;
+                
+                // add this option to the dropdown
                 select.appendChild(option);
             });
             
             console.log('[DROPDOWN] Successfully populated dropdown');
         }
 
+        // Citation for loadAuthorData:
+        // This function is directly based off of the loadRentalData function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this loadRentalData function and modify it to fit my authors form. [Paste in loadRentalData function, Authors form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads author form data instead of rental form data, and doesn't require date parsing.
+        // loads author details into the form fields when selected from dropdown
         function loadAuthorData() {
             console.log('[EDIT] loadAuthorData() called');
+            
+            // get the dropdown element and its currently selected value
             const select = document.getElementById('edit_author_id');
             const authorId = select.value;
             
             console.log('[EDIT] Selected author ID:', authorId);
             
+            // if no author is selected, clear the form and exit
             if (!authorId) {
                 console.log('[EDIT] No author selected, clearing form');
-                clearEditForm();
+                clearEditForm(); // reset all form fields
                 return;
             }
             
-            // Find the author in our stored data
+            // search through our cached author data to find the selected author
+            // use == instead of === to handle string/number comparison
             const author = allAuthors.find(a => a.author_id == authorId);
             console.log('[EDIT] Found author data:', author);
             
+            // handle case where author data isn't found in our cache
             if (!author) {
                 console.error('[EDIT] Author not found in stored data');
                 showMessage('Author data not found', 'error');
                 return;
             }
             
-            // Populate the form fields
+            // populate the edit form fields with the selected author's current data
+            // use fallback empty strings if any properties are missing
             document.getElementById('edit_name').value = author.name || '';
             document.getElementById('edit_bio').value = author.bio || '';
             
             console.log('[EDIT] Form populated with author data');
         }
 
+        // Citation for deleteAuthor function:
+        // This function is directly based off of the deleteRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this deleteRental function and modify it to fit my authors deletion. [Paste in deleteRental function, Authors deletion section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it deletes an author instead of a rental.
+        // sends a DELETE request to remove an author
         async function deleteAuthor(authorId) {
             console.log('[DELETE] deleteAuthor called for ID:', authorId);
+            
+            // show confirmation dialog to prevent accidental deletions
             if (confirm(`Are you sure you want to delete author ${authorId}?`)) {
                 try {
                     console.log('[DELETE] Sending DELETE request for author:', authorId);
+                    
+                    // make HTTP DELETE request to the specific author endpoint
                     const response = await fetch(`/api/authors/${authorId}`, {
                         method: 'DELETE'
                     });
                     
                     console.log('[DELETE] Response status:', response.status);
+                    
+                    // parse the JSON response from the server
                     const result = await response.json();
                     console.log('[DELETE] Response data:', result);
                     
+                    // check if the deletion was successful
                     if (response.ok) {
                         console.log('[DELETE] Author deleted successfully');
+                        
+                        // show success message to user
                         showMessage(result.message || 'Author deleted successfully', 'success');
-                        loadAuthors(); // Reload the table
+                        
+                        // refresh the author list to reflect the deletion
+                        loadAuthors(); // refresh data after deletion
                     } else {
+                        // handle server-side errors (author not found, etc.)
                         console.error('[DELETE] Error deleting author:', result.error);
                         showMessage(result.error || 'Error deleting author', 'error');
                     }
                 } catch (error) {
+                    // handle network errors or other client-side issues
                     console.error('[DELETE] Error deleting author:', error);
                     showMessage('Error deleting author: ' + error.message, 'error');
                 }
-            }
+            } // if user cancels confirmation, nothing happens
         }
 
+        // Citation for createAuthor function:
+        // This function is directly based off of the createRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this createRental function and modify it to fit my authors creation. [Paste in createRental function, Authors creation section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it creates an author instead of a rental.
+        // sends a POST request to create a new author
         async function createAuthor(formData) {
             console.log('[CREATE] createAuthor called with data:', formData);
             try {
                 console.log('[CREATE] Sending POST request to /api/authors');
+                
+                // make HTTP POST request to create a new author
                 const response = await fetch('/api/authors', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // tell server we're sending JSON
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData) // convert JavaScript object to JSON string
                 });
                 
                 console.log('[CREATE] Response status:', response.status);
+                
+                // parse the server's JSON response
                 const result = await response.json();
                 console.log('[CREATE] Response data:', result);
                 
+                // check if author creation was successful
                 if (response.ok) {
                     console.log('[CREATE] Author created successfully:', result.message);
+                    
+                    // show success message to user
                     showMessage(result.message || 'Author created successfully', 'success');
-                    document.getElementById('addAuthorForm').reset();
-                    loadAuthors(); // Reload the table
+                    
+                    // clear the add author form to prepare for next entry
+                    document.getElementById('addAuthorForm').reset(); // clear form
+                    
+                    // refresh the author list to show the new author
+                    loadAuthors(); // refresh data
                 } else {
+                    // handle server-side validation errors or other issues
                     console.error('[CREATE] Error creating author:', result.error);
                     showMessage(result.error || 'Error creating author', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[CREATE] Error creating author:', error);
                 showMessage('Error creating author: ' + error.message, 'error');
             }
         }
 
+        // Citation for updateAuthor:
+        // This function is directly based off of the updateRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the authors function.
+        // Prompt: Take this updateRental function and modify it to fit my authors updating. [Paste in updateRental function, Authors updating section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it updates an author instead of a rental.
+        // sends a PUT request to update an existing author
         async function updateAuthor(authorId, formData) {
             console.log('[UPDATE] updateAuthor called for ID:', authorId, 'with data:', formData);
             try {
                 console.log('[UPDATE] Sending PUT request to /api/authors/' + authorId);
+                
+                // make HTTP PUT request to update the specific author
                 const response = await fetch(`/api/authors/${authorId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // specify we're sending JSON data
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData) // convert form data to JSON string
                 });
                 
                 console.log('[UPDATE] Response status:', response.status);
+                
+                // parse the server's response
                 const result = await response.json();
                 console.log('[UPDATE] Response data:', result);
                 
+                // check if the update was successful
                 if (response.ok) {
                     console.log('[UPDATE] Author updated successfully:', result.message);
+                    
+                    // show success message to user
                     showMessage(result.message || 'Author updated successfully', 'success');
+                    
+                    // clear the edit form since update is complete
                     clearEditForm();
-                    loadAuthors(); // Reload the table
+                    
+                    // refresh the author list to show updated information
+                    loadAuthors(); // refresh data
                 } else {
+                    // handle server-side validation errors or author not found
                     console.error('[UPDATE] Error updating author:', result.error);
                     showMessage(result.error || 'Error updating author', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[UPDATE] Error updating author:', error);
                 showMessage('Error updating author: ' + error.message, 'error');
             }
         }
 
+        // Citation for clearEditForm:
+        // AI was used to help me reset the html form.
+        // Prompt used: "How do I reset an HTML form in the same file's javascript <script>?""
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // clears all fields in the edit form by resetting it
         function clearEditForm() {
             console.log('[EDIT] Clearing edit form');
             document.getElementById('editAuthorForm').reset();
         }
 
+        // Citation for addAuthorForm event listener:
+        // This event listener is directly based off of the createRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the authors event listener.
+        // Prompt: Take this createRentalForm event listener and modify it to fit my authors form. [Paste in createRentalForm event listener, Authors form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // event listener for add author form submission
         document.getElementById('addAuthorForm').addEventListener('submit', function(e) {
             console.log('[FORM] Add author form submitted');
-            e.preventDefault();
             
+            // prevent the browser's default form submission behavior (page reload)
+            e.preventDefault(); // prevent default form behavior (page reload)
+            
+            // extract data from the form using FormData API
             const formData = new FormData(this);
+            
+            // build a clean JavaScript object with the form data
+            // get values from named form fields
             const authorData = {
-                name: formData.get('name'),
-                bio: formData.get('bio') || null
+                name: formData.get('name'), // get the name input value
+                bio: formData.get('bio') || null // get the bio textarea value, null if empty
             };
             
             console.log('[FORM] Parsed add author data:', authorData);
+            
+            // call the createAuthor function with the collected data
             createAuthor(authorData);
         });
 
+        // Citation for editAuthorForm event listener:
+        // This event listener is directly based off of the editRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the authors event listener.
+        // Prompt: Take this editRentalForm event listener and modify it to fit my authors form. [Paste in editRentalForm event listener, Authors form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // event listener for edit author form submission
         document.getElementById('editAuthorForm').addEventListener('submit', function(e) {
             console.log('[FORM] Edit author form submitted');
+            
+            // prevent default browser form submission behavior
             e.preventDefault();
             
+            // extract data from the edit form
             const formData = new FormData(this);
             const authorId = formData.get('author_id');
             
             console.log('[FORM] Selected author ID for edit:', authorId);
             
+            // validate that an author has been selected for editing
             if (!authorId) {
                 console.error('[FORM] No author selected for edit');
                 showMessage('Please select an author to edit', 'error');
                 return;
             }
             
+            // extract all form data and prepare the payload for update
             const authorData = {
-                name: formData.get('name'),
-                bio: formData.get('bio') || null
+                name: formData.get('name'), // get the updated name
+                bio: formData.get('bio') || null // get the updated bio, null if empty
             };
             
             console.log('[FORM] Parsed edit author data:', authorData);
+            
+            // call the updateAuthor function with the ID and data
             updateAuthor(authorId, authorData);
         });
 
+        // Citation for DOMContentLoaded Event listener:
+        // This is directly based off of the DOMContentLoaded event listener in rentals.html, which was based on MDN Web Docs - "DOMContentLoaded" event usage pattern
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
+        // when the page finishes loading, trigger author data loading
         document.addEventListener('DOMContentLoaded', function() {
             console.log('[INIT] Page loaded, ready to load authors');
             loadAuthors();

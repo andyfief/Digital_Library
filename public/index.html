@@ -5,16 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Library Management System</title>
     <style>
+        /* Main body styling with clean font and margins */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        
+        /* Main heading color styling */
         h1 {
             color: #333;
         }
+        
+        /* Individual page link container styling */
         .page-link {
             margin-bottom: 20px;
         }
+        
+        /* Link styling with hover effects */
         a {
             color: #0066cc;
             text-decoration: none;
@@ -22,12 +29,16 @@
         a:hover {
             text-decoration: underline;
         }
+        
+        /* Navigation links container styling with background and border */
         .nav-links {
             margin-bottom: 20px;
             padding: 10px;
             background-color: #f2f2f2;
             border: 1px solid #ddd;
         }
+        
+        /* Reset button styling with red theme and hover effects */
         .reset-button {
             margin-top: 20px;
             padding: 10px 20px;
@@ -44,6 +55,8 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        
+        /* Message styling for success and error notifications */
         .message {
             padding: 10px;
             margin: 10px 0;
@@ -54,6 +67,13 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        /* Special styling for many-to-many relationship explanation section */
         .explainManyToMany {
             padding-left: 45px;
             width: fit-content;
@@ -61,7 +81,13 @@
             align-items: center;
             gap: 10px;
         }
-      .lookAtMe {
+        
+        /* Eye-catching styling for the many-to-many attention grabber */
+        /* AI was used to generate the css for this element to Prompt: "Help me make this draw the eye so its noticeable right away." */
+        /* At first it gave me something way over the top but I slimmed it down to something reasonable. */
+        /* AI Source URL: claude.ai */
+        /* Date: 05/2025 */
+        .lookAtMe {
             font-size: 30px;
             font-weight: bold;
             color: #00ff15;
@@ -69,14 +95,10 @@
             text-shadow: 1px 1px 2px black;
             margin: 0;
         }
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
     </style>
 </head>
 <body>
+    <!-- Main navigation links section at top of page -->
     <div class="nav-links">
         <strong>Navigation:</strong>
         <a href="index.html">Home</a> |
@@ -88,93 +110,144 @@
         <a href="update_book_genres.html">Book Genres</a>
     </div>
 
+    <!-- Main page heading and welcome message -->
     <h1>Library Management System - Index Page</h1>
     <p>Welcome to the Library Management System. Use the links below to navigate to different sections:</p>
     
+    <!-- Message container for displaying notifications -->
     <div id="message"></div>
     
+    <!-- Collection of page links with descriptions -->
     <div class="page-links">
+        <!-- Books management section link -->
         <div class="page-link">
             <h3><a href="books.html">Books Management</a></h3>
             <p>View, add, update, and delete books in the library inventory.</p>
         </div>
         
+        <!-- Authors management section link -->
         <div class="page-link">
             <h3><a href="authors.html">Authors Management</a></h3>
             <p>Manage information about book authors.</p>
         </div>
         
+        <!-- Genres management section link -->
         <div class="page-link">
             <h3><a href="genres.html">Genres Management</a></h3>
             <p>Manage book genres and their associations with books.</p>
         </div>
         
+        <!-- Users management section link -->
         <div class="page-link">
             <h3><a href="users.html">Users Management</a></h3>
             <p>Add, update, and delete library system users.</p>
         </div>
         
+        <!-- Rentals management section link -->
         <div class="page-link">
             <h3><a href="rentals.html">Rentals Management</a></h3>
             <p>Track book rentals, returns, and availability.</p>
         </div>
 
+        <!-- Special section for many-to-many relationship management with attention-grabbing styling -->
         <div class="page-link">
             <h3><a href="update_book_genres.html">Book-Genre Relationships Management</a></h3>
             <div class="explainManyToMany">
+                <!-- Eye-catching asterisks to draw attention to the many-to-many relationship -->
                 <p class="lookAtMe">********</p>
                 <p class="MMDesc">Update the Many-to-Many relationship between Genres and Books.</p>
             </div>
         </div>
     </div>
 
+    <!-- Database reset section with warning text -->
     <div>
         <button class="reset-button" id="resetBtn" onclick="resetDatabase()">RESET DATABASE</button>
         <p><em>This button resets all data to the original sample data (calls the reset_database stored procedure).</em></p>
     </div>
 
-         <script>
-        // Show message to user
+    <script>
+        // General Citations for Index.html Script:
+        // The basic structure and showMessage function follow patterns established in other HTML files.
+        // However, most of the JavaScript in this file is unique to the index page functionality.
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+
+        // Citation for showMessage:
+        // This function is similar to the showMessage function in other HTML files, which is all my own work.
+        // However, this version includes inline styling and dynamic message container creation specific to the index page.
+        // This function displays success or error messages and automatically clears them after 5 seconds.
         function showMessage(message, type = 'success') {
-            // Create message div if it doesn't exist
+            // create message div dynamically if it doesn't already exist in the DOM
             let messageDiv = document.getElementById('message');
             if (!messageDiv) {
+                // create new message container element
                 messageDiv = document.createElement('div');
                 messageDiv.id = 'message';
+                
+                // insert the message div before the page-links section for proper positioning
                 document.body.insertBefore(messageDiv, document.querySelector('.page-links'));
             }
             
+            // inject the message with appropriate inline styling based on message type
+            // use conditional styling to show success (green) or error (red) messages
             messageDiv.innerHTML = `<div style="padding: 10px; margin: 10px 0; border-radius: 4px; background-color: ${type === 'success' ? '#d4edda' : '#f8d7da'}; color: ${type === 'success' ? '#155724' : '#721c24'}; border: 1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'};">${message}</div>`;
+            
+            // set a timer to automatically clear the message after 5 seconds
             setTimeout(() => {
+                // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
         }
 
-        // Reset database function
+        // Citation for resetDatabase function:
+        // This function is all my own work.
+        // This function handles the database reset functionality by calling the backend reset API.
         async function resetDatabase() {
+            // get reference to the reset button element
             const button = document.querySelector('.reset-button');
+            
+            // store the original button text to restore it later
             const originalText = button.textContent;
+            
+            // disable the button and change text to show reset is in progress
             button.disabled = true;
             button.textContent = 'Resetting...';
+            
             try {
+                console.log('[RESET] Sending POST request to /api/reset');
+                
+                // make HTTP POST request to the reset endpoint
                 const response = await fetch('/api/reset', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // specify we're sending JSON data
                     }
                 });
                 
-                const result = await response.json();
+                console.log('[RESET] Response status:', response.status);
                 
+                // parse the server's JSON response
+                const result = await response.json();
+                console.log('[RESET] Response data:', result);
+                
+                // check if the reset was successful
                 if (response.ok) {
+                    console.log('[RESET] Database reset successful');
+                    
+                    // show success message to user
                     showMessage('Database reset successfully!', 'success');
                 } else {
+                    // handle server-side errors during reset
+                    console.error('[RESET] Error resetting database:', result.error);
                     showMessage('Error: ' + (result.error || 'Unknown error occurred'), 'error');
                 }
             } catch (error) {
-                console.error('Error resetting database:', error);
+                // handle network errors or other client-side issues
+                console.error('[RESET] Error resetting database:', error);
                 showMessage('Error resetting database: ' + error.message, 'error');
             } finally {
+                // always re-enable the button and restore original text, regardless of success or failure
                 button.disabled = false;
                 button.textContent = originalText;
             }
