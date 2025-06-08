@@ -8,16 +8,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Books Management - Library System</title>
     <style>
+        /* Main body styling with clean font and margins */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
+        
+        /* Header section styling */
         header {
             margin-bottom: 20px;
         }
+        
+        /* Main heading colors */
         h1, h2 {
             color: #333;
         }
+        
+        /* Table styling with full width and collapsed borders */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -30,23 +37,33 @@
             padding: 8px;
             text-align: left;
         }
+        
+        /* Header row styling with light gray background */
         th {
             background-color: #f2f2f2;
         }
+        
+        /* Form container styling */
         form {
             max-width: 600px;
             margin-bottom: 30px;
         }
+        
+        /* Label styling with block display for vertical stacking */
         label {
             display: block;
             margin-top: 10px;
         }
+        
+        /* Input, textarea, and select field styling */
         input, textarea, select {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
             box-sizing: border-box;
         }
+        
+        /* Button styling with green theme */
         button {
             padding: 8px 16px;
             margin-top: 10px;
@@ -58,18 +75,26 @@
         button:hover {
             background-color: #45a049;
         }
+        
+        /* Action button spacing */
         .actions button {
             margin-right: 5px;
         }
+        
+        /* Navigation links styling */
         .nav-links {
             margin-bottom: 20px;
         }
+        
+        /* Edit form container styling */
         .edit-form {
             background-color: #f9f9f9;
             padding: 20px;
             border: 1px solid #ddd;
             margin-bottom: 20px;
         }
+        
+        /* Message styling for success and error notifications */
         .message {
             padding: 10px;
             margin: 10px 0;
@@ -88,6 +113,7 @@
     </style>
 </head>
 <body>
+    <!-- Main header with navigation links -->
     <header>
         <h1>Books Management</h1>
         <div class="nav-links">
@@ -101,43 +127,55 @@
         </div>
     </header>
 
+    <!-- Message container for displaying success/error messages -->
     <div id="message"></div>
 
+    <!-- Add new book form section -->
     <section>
         <h2>Add New Book</h2>
         <form id="addBookForm">
+            <!-- Book title input field -->
             <div>
                 <label for="title">Title:</label>
                 <input type="text" id="title" name="title" required>
             </div>
             
+            <!-- Author selection dropdown -->
             <div>
                 <label for="author">Author:</label>
                 <select id="author" name="author_id" required>
                     <option value="">Select Author</option>
-                    <!-- Options will be populated by JavaScript -->
+                    <option value="1">J.K. Rowling</option>
+                    <option value="2">George Orwell</option>
+                    <option value="3">Rick Riordan</option>
                 </select>
             </div>
             
+            <!-- Publication date input -->
             <div>
                 <label for="publication_date">Publication Date:</label>
                 <input type="date" id="publication_date" name="publication_date" required>
             </div>
             
+            <!-- Book description textarea -->
             <div>
                 <label for="description">Description:</label>
                 <textarea id="description" name="description" rows="4"></textarea>
             </div>
             
+            <!-- Total quantity input -->
             <div>
                 <label for="total_qty">Total Quantity:</label>
                 <input type="number" id="total_qty" name="total_qty" min="1" required>
             </div>
             
+            <!-- Genre selection with multiple choice capability -->
             <div>
                 <label for="genres">Genres:</label>
                 <select id="genres" name="genres" multiple>
-                    <!-- Options will be populated by JavaScript -->
+                    <option value="1">Fantasy</option>
+                    <option value="2">Dystopian</option>
+                    <option value="3">Young Adult</option>
                 </select>
                 <small>Hold Ctrl (Windows) or Cmd (Mac) to select multiple genres</small>
             </div>
@@ -146,9 +184,11 @@
         </form>
     </section>
 
+    <!-- Edit existing book form section -->
     <section>
         <h2>Edit Book</h2>
         <form id="editBookForm">
+            <!-- Book selection dropdown for editing -->
             <div>
                 <label for="edit_book_id">Book ID:</label>
                 <select id="edit_book_id" name="book_id" onchange="loadBookData()" required>
@@ -157,36 +197,49 @@
                 </select>
             </div>
             
+            <!-- Book title input for editing -->
             <div>
                 <label for="edit_title">Title:</label>
                 <input type="text" id="edit_title" name="title" required>
             </div>
             
+            <!-- Author selection for editing -->
             <div>
                 <label for="edit_author">Author:</label>
                 <select id="edit_author" name="author_id" required>
                     <option value="">Select Author</option>
-                    <!-- Options will be populated by JavaScript -->
+                    <option value="1">J.K. Rowling</option>
+                    <option value="2">George Orwell</option>
+                    <option value="3">Rick Riordan</option>
                 </select>
             </div>
             
+            <!-- Publication date for editing -->
             <div>
                 <label for="edit_publication_date">Publication Date:</label>
                 <input type="date" id="edit_publication_date" name="publication_date" required>
             </div>
             
+            <!-- Description for editing -->
             <div>
                 <label for="edit_description">Description:</label>
                 <textarea id="edit_description" name="description" rows="4"></textarea>
             </div>
             
+            <!-- Total quantity for editing -->
             <div>
                 <label for="edit_total_qty">Total Quantity:</label>
                 <input type="number" id="edit_total_qty" name="total_qty" min="1" required>
             </div>
             
+            <!-- Genres for editing -->
             <div>
-                <p>Please Edit Genres on the Book Genres page.</p>
+                <label for="edit_genres">Genres:</label>
+                <select id="edit_genres" name="genres" multiple>
+                    <option value="1">Fantasy</option>
+                    <option value="2">Dystopian</option>
+                    <option value="3">Young Adult</option>
+                </select>
             </div>
             
             <button type="submit">Update Book</button>
@@ -194,6 +247,7 @@
         </form>
     </section>
 
+    <!-- Books data table section -->
     <section>
         <h2>Existing Books</h2>
         <p>This table shows all books. Data populated with: <code>SELECT * FROM Books;</code></p>
@@ -216,205 +270,123 @@
     </section>
 
     <script>
-        console.log('Books script loaded');
-        
-        // Store data globally for easy access
-        let allBooks = [];
-        let allAuthors = [];
-        let allGenres = [];
+        // General Citations for Books.html Script:
+        // Ai was used to add various try/catch blocks and response checks.
+        // For example, if (!tbody) return; (populateBooksTable())
+        // This was often done with a single prompt when encountering issues after implementing a single function.
+        // An example prompt might be, "Im having trouble with this function. Add try/catch blocks and use the showMessage function or console.log()
+        // To help me debug the function."
+        // AI Source URL: https://claude.ai
+        // Citations below this may say "All my work", however, this citation should be inferred.
 
+        console.log('[INIT] Books script loaded');
+        
+        // global array to store books, avoids needing to refetch from the API multiple times
+        let allBooks = [];
+
+        // Citation for showMessage:
+        // This function is directly based off of the showMessage function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this showMessage function and modify it to fit my books page. [Paste in showMessage function, Books page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it displays messages for book operations instead of rental operations.
+        // Displays a success or error message and disappears after 5 seconds.
         function showMessage(message, type = 'success') {
+            // log the message type and content to console for debugging
             console.log(`[MESSAGE] ${type.toUpperCase()}: ${message}`);
+            
+            // get the message display container from the DOM
             const messageDiv = document.getElementById('message');
+            
+            // inject the message with appropriate styling class (success or error)
             messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+            
+            // set a timer to automatically clear the message after 5 seconds
             setTimeout(() => {
+                // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
         }
 
-        async function loadAuthors() {
-            console.log('[LOAD] loadAuthors() called');
-            try {
-                console.log('[LOAD] Fetching from /api/authors...');
-                const response = await fetch('/api/authors');
-                console.log('[LOAD] Authors response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Get the HTML response and extract JSON
-                const htmlResponse = await response.text();
-                const jsonMatch = htmlResponse.match(/\[.*\]/);
-                
-                if (!jsonMatch) {
-                    throw new Error('No JSON data found in authors response');
-                }
-                
-                const jsonString = jsonMatch[0];
-                const authors = JSON.parse(jsonString);
-                console.log('[LOAD] Parsed authors data:', authors);
-                
-                // Store authors globally
-                allAuthors = authors;
-                
-                // Populate author dropdowns
-                populateAuthorDropdowns(authors);
-                
-                console.log(`[LOAD] Successfully loaded ${authors.length} authors`);
-                
-            } catch (error) {
-                console.error('[LOAD] Error in loadAuthors:', error);
-                showMessage('Error loading authors: ' + error.message, 'error');
-            }
-        }
-
-        async function loadGenres() {
-            console.log('[LOAD] loadGenres() called');
-            try {
-                console.log('[LOAD] Fetching from /api/genres...');
-                const response = await fetch('/api/genres');
-                console.log('[LOAD] Genres response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                // Get the HTML response and extract JSON
-                const htmlResponse = await response.text();
-                const jsonMatch = htmlResponse.match(/\[.*\]/);
-                
-                if (!jsonMatch) {
-                    throw new Error('No JSON data found in genres response');
-                }
-                
-                const jsonString = jsonMatch[0];
-                const genres = JSON.parse(jsonString);
-                console.log('[LOAD] Parsed genres data:', genres);
-                
-                // Store genres globally
-                allGenres = genres;
-                
-                // Populate genre dropdowns
-                populateGenreDropdowns(genres);
-                
-                console.log(`[LOAD] Successfully loaded ${genres.length} genres`);
-                
-            } catch (error) {
-                console.error('[LOAD] Error in loadGenres:', error);
-                showMessage('Error loading genres: ' + error.message, 'error');
-            }
-        }
-
+        // Citation for loadBooks:
+        // This function is directly based off of the loadRentals function in rentals.html, which was generated with AI.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this loadRentals function and modify it to fit my books page. [Paste in loadRentals function, Books page section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads book data instead of rental data, but AI tools were still used to generate the function that this one is derived from.
+        // gets book data from the server and updates the UI
         async function loadBooks() {
             console.log('[LOAD] loadBooks() called');
             try {
+                // start by making a GET request to retrieve book data
                 console.log('[LOAD] Fetching from /api/books...');
-                const response = await fetch('/api/books');
+                const response = await fetch('/api/books'); // sends GET request to books API
                 console.log('[LOAD] Response status:', response.status);
                 
+                // if the response is not OK (e.g., 404, 500), throw an error
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                // Get the HTML response
+                // fetch the raw text (HTML or mixed response body)
                 const htmlResponse = await response.text();
                 console.log('[LOAD] Raw response length:', htmlResponse.length);
                 
-                // Extract JSON from the HTML response
+                // extract JSON array string using regex, assuming it's embedded within HTML
                 const jsonMatch = htmlResponse.match(/\[.*\]/);
                 
+                // if no match is found, assume the response format is invalid
                 if (!jsonMatch) {
                     throw new Error('No JSON data found in response');
                 }
                 
+                // grab the matched JSON substring and parse it
                 const jsonString = jsonMatch[0];
                 console.log('[LOAD] Extracted JSON string length:', jsonString.length);
                 
                 const books = JSON.parse(jsonString);
                 console.log('[LOAD] Parsed books data:', books);
                 
-                // Store books globally
+                // store result globally to avoid re-fetching later
                 allBooks = books;
                 
-                // Populate the table
+                // refresh the book display and dropdown with latest data
                 populateBooksTable(books);
-                
-                // Populate the edit dropdown
                 populateEditDropdown(books);
                 
                 console.log(`[LOAD] Successfully loaded ${books.length} books`);
                 
             } catch (error) {
+                // catch network or JSON parse errors and inform the user
                 console.error('[LOAD] Error in loadBooks:', error);
                 showMessage('Error loading books: ' + error.message, 'error');
             }
         }
 
-        function populateAuthorDropdowns(authors) {
-            console.log('[DROPDOWN] Populating author dropdowns with', authors.length, 'authors');
-            
-            // Get all author select elements
-            const authorSelects = ['author', 'edit_author'];
-            
-            authorSelects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                if (!select) {
-                    console.error(`[DROPDOWN] Could not find ${selectId} select`);
-                    return;
-                }
-                
-                // Clear existing options except the first one
-                select.innerHTML = '<option value="">Select Author</option>';
-                
-                authors.forEach(author => {
-                    const option = document.createElement('option');
-                    option.value = author.author_id;
-                    option.textContent = author.name;
-                    select.appendChild(option);
-                });
-            });
-            
-            console.log('[DROPDOWN] Successfully populated author dropdowns');
-        }
-
-        function populateGenreDropdowns(genres) {
-            console.log('[DROPDOWN] Populating genre dropdowns with', genres.length, 'genres');
-            
-            // Get all genre select elements
-            const genreSelects = ['genres'];
-            
-            genreSelects.forEach(selectId => {
-                const select = document.getElementById(selectId);
-                if (!select) {
-                    console.error(`[DROPDOWN] Could not find ${selectId} select`);
-                    return;
-                }
-                
-                // Clear existing options
-                select.innerHTML = '';
-                
-                genres.forEach(genre => {
-                    const option = document.createElement('option');
-                    option.value = genre.genre_id;
-                    option.textContent = genre.title;
-                    select.appendChild(option);
-                });
-            });
-            
-            console.log('[DROPDOWN] Successfully populated genre dropdowns');
-        }
-
+        // Citation for populateBooksTable:
+        // This function is directly based off of the populateRentalsTable function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this populateRentalsTable function and modify it to fit my books table. [Paste in populateRentalsTable, Books ddl section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates a book table instead of rental table, with different column data.
+        // populates the book table with data passed to it
         function populateBooksTable(books) {
             console.log('[TABLE] Populating books table with', books.length, 'books');
+            
+            // get reference to the table body element where we'll insert rows
             const tbody = document.getElementById('booksTableBody');
             if (!tbody) {
                 console.error('[TABLE] Could not find booksTableBody');
-                return;
+                return; // exit early if table body doesn't exist
             }
             
+            // remove any existing rows to start fresh
             tbody.innerHTML = '';
             
+            // handle the case where no books are returned from the API
             if (books.length === 0) {
                 tbody.innerHTML = `
                     <tr>
@@ -423,83 +395,118 @@
                         </td>
                     </tr>
                 `;
-                return;
+                return; // exit since there's nothing more to do
             }
             
-            // Create table rows for each book
+            // iterate through each book and create a table row
             books.forEach((book, index) => {
                 console.log(`[TABLE] Processing book ${index + 1}:`, book);
                 
-                // Find author name from the authors array
-                const author = allAuthors.find(a => a.author_id == book.author_id);
-                const authorName = author ? author.name : `Author ID: ${book.author_id}`;
-                
+                // create a new table row element
                 const row = document.createElement('tr');
                 
+                // build the HTML content for this row with book data
+                // use fallback values ('N/A') if any book properties are missing
                 row.innerHTML = `
                     <td>${book.book_id || 'N/A'}</td>
                     <td>${book.title || 'N/A'}</td>
-                    <td>${authorName}</td>
-                    <td>${book.publication_date || 'N/A'}</td>
+                    <td>${book.author_id || 'N/A'}</td>
+                    <td>${book.publication_date ? book.publication_date.split('T')[0] : 'N/A'}</td>
                     <td>${book.total_qty || 'N/A'}</td>
                     <td>${book.description || 'N/A'}</td>
                     <td class="actions">
                         <button class="delete-btn" onclick="deleteBook(${book.book_id})">Delete</button>
                     </td>
                 `;
+                
+                // add the completed row to the table body
                 tbody.appendChild(row);
             });
             
             console.log(`[TABLE] Successfully populated table with ${books.length} books`);
         }
 
+        // Citation for populateEditDropdown:
+        // This function is directly based off of the populateEditDropdown function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this populateEditDropdown function and modify it to fit my books dropdown. [Paste in populateEditDropdown function, Books dropdown section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it populates a book dropdown instead of rental dropdown.
+        // fills a dropdown in the edit form with available books
         function populateEditDropdown(books) {
             console.log('[DROPDOWN] Populating edit dropdown with', books.length, 'books');
+            
+            // get reference to the dropdown select element
             const select = document.getElementById('edit_book_id');
             if (!select) {
                 console.error('[DROPDOWN] Could not find edit_book_id select');
-                return;
+                return; // exit if dropdown element doesn't exist
             }
             
-            // Clear existing options except the first one
+            // reset the dropdown with just the default "select one" option
             select.innerHTML = '<option value="">Select Book to Edit</option>';
             
+            // add each book as a selectable option in the dropdown
             books.forEach(book => {
+                // create a new option element for this book
                 const option = document.createElement('option');
+                
+                // set the option's value to the book ID (what gets submitted)
                 option.value = book.book_id;
+                
+                // set the display text to show both ID and title for clarity
                 option.textContent = `${book.book_id} - ${book.title}`;
+                
+                // add this option to the dropdown
                 select.appendChild(option);
             });
             
             console.log('[DROPDOWN] Successfully populated dropdown');
         }
 
+        // Citation for loadBookData:
+        // This function is directly based off of the loadRentalData function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this loadRentalData function and modify it to fit my books form. [Paste in loadRentalData function, Books form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it loads book form data instead of rental form data, and includes publication date parsing.
+        // loads book details into the form fields when selected from dropdown
         async function loadBookData() {
             console.log('[EDIT] loadBookData() called');
+            
+            // get the dropdown element and its currently selected value
             const select = document.getElementById('edit_book_id');
             const bookId = select.value;
             
             console.log('[EDIT] Selected book ID:', bookId);
             
+            // if no book is selected, clear the form and exit
             if (!bookId) {
                 console.log('[EDIT] No book selected, clearing form');
-                clearEditForm();
+                clearEditForm(); // reset all form fields
                 return;
             }
             
-            // Find the book in our stored data
+            // search through our cached book data to find the selected book
+            // use == instead of === to handle string/number comparison
             const book = allBooks.find(b => b.book_id == bookId);
             console.log('[EDIT] Found book data:', book);
             
+            // handle case where book data isn't found in our cache
             if (!book) {
                 console.error('[EDIT] Book not found in stored data');
                 showMessage('Book data not found', 'error');
                 return;
             }
             
-            // Populate the form fields
+            // populate the edit form fields with the selected book's current data
+            // use fallback empty strings if any properties are missing
             document.getElementById('edit_title').value = book.title || '';
             document.getElementById('edit_author').value = book.author_id || '';
+            
+            // handle publication date parsing (remove time component if present)
             document.getElementById('edit_publication_date').value = book.publication_date ? book.publication_date.split('T')[0] : '';
             document.getElementById('edit_description').value = book.description || '';
             document.getElementById('edit_total_qty').value = book.total_qty || '';
@@ -507,39 +514,69 @@
             console.log('[EDIT] Form populated with book data');
         }
 
+        // Citation for deleteBook function:
+        // This function is directly based off of the deleteRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this deleteRental function and modify it to fit my books deletion. [Paste in deleteRental function, Books deletion section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it deletes a book instead of a rental.
+        // sends a DELETE request to remove a book
         async function deleteBook(bookId) {
             console.log('[DELETE] deleteBook called for ID:', bookId);
+            
+            // show confirmation dialog to prevent accidental deletions
             if (confirm(`Are you sure you want to delete book ${bookId}?`)) {
                 try {
                     console.log('[DELETE] Sending DELETE request for book:', bookId);
+                    
+                    // make HTTP DELETE request to the specific book endpoint
                     const response = await fetch(`/api/books/${bookId}`, {
                         method: 'DELETE'
                     });
                     
                     console.log('[DELETE] Response status:', response.status);
+                    
+                    // parse the JSON response from the server
                     const result = await response.json();
                     console.log('[DELETE] Response data:', result);
                     
+                    // check if the deletion was successful
                     if (response.ok) {
                         console.log('[DELETE] Book deleted successfully');
+                        
+                        // show success message to user
                         showMessage(result.message || 'Book deleted successfully', 'success');
-                        loadBooks(); // Reload the table
+                        
+                        // refresh the book list to reflect the deletion
+                        loadBooks(); // refresh data after deletion
                     } else {
+                        // handle server-side errors (book not found, etc.)
                         console.error('[DELETE] Error deleting book:', result.error);
                         showMessage(result.error || 'Error deleting book', 'error');
                     }
                 } catch (error) {
+                    // handle network errors or other client-side issues
                     console.error('[DELETE] Error deleting book:', error);
                     showMessage('Error deleting book: ' + error.message, 'error');
                 }
-            }
+            } // if user cancels confirmation, nothing happens
         }
 
+        // Citation for createBook function:
+        // This function is directly based off of the createRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this createRental function and modify it to fit my books creation. [Paste in createRental function, Books creation section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // Additional AI help was used to make relationship table update when this is called.
+        // This function differs in the sense that it creates a book instead of a rental, and handles genre relationships.
+        // sends a POST request to create a new book
         async function createBook(formData) {
-            // Claude AI helped with making relationship table update when this is called.
             console.log('[CREATE] createBook called with data:', formData);
             try {
-                // First create the book (without genres)
+                // first create the book (without genres) to get a book ID
+                console.log('[CREATE] Sending POST request to /api/books');
                 const bookResponse = await fetch('/api/books', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -552,163 +589,230 @@
                     })
                 });
                 
+                console.log('[CREATE] Response status:', bookResponse.status);
+                
+                // parse the server's JSON response
                 const bookResult = await bookResponse.json();
                 console.log('[CREATE] Book creation result:', bookResult);
-                console.log('[CREATE] Book ID from result:', bookResult.book_id); // Debug the book_id
+                console.log('[CREATE] Book ID from result:', bookResult.book_id); // debug the book_id
                 
+                // check if book creation was successful
                 if (bookResponse.ok) {
                     console.log('[CREATE] Book created successfully, now adding genres...');
                     
-                    // Check if genres were selected and add relationships
+                    // check if genres were selected and add relationships
                     if (formData.genres && formData.genres.length > 0 && bookResult.book_id) {
                         const bookId = bookResult.book_id;
                         console.log('[CREATE] Adding genres for book ID:', bookId, 'Genres:', formData.genres);
                         
-                        // Add each genre relationship
+                        // add each genre relationship individually
                         for (const genreId of formData.genres) {
                             console.log('[CREATE] Adding genre relationship: genre', genreId, 'to book:', bookId);
                             try {
+                                // make POST request to create book-genre relationship
                                 const relationshipResponse = await fetch('/api/relationships', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                         genre_id: parseInt(genreId),
-                                        book_id: parseInt(bookId)  // Make sure this is an integer
+                                        book_id: parseInt(bookId)  // ensure this is an integer
                                     })
                                 });
                                 
                                 const relationshipResult = await relationshipResponse.json();
                                 console.log('[CREATE] Relationship result:', relationshipResult);
                                 
+                                // handle relationship creation errors
                                 if (!relationshipResponse.ok) {
                                     console.error('[CREATE] Error adding genre relationship:', relationshipResult.error);
                                     showMessage(`Warning: ${relationshipResult.error}`, 'error');
                                 }
                             } catch (relationshipError) {
+                                // handle network errors for relationship creation
                                 console.error('[CREATE] Error adding genre relationship:', relationshipError);
                                 showMessage(`Warning: Error adding genre relationship: ${relationshipError.message}`, 'error');
                             }
                         }
                     } else if (formData.genres && formData.genres.length > 0 && !bookResult.book_id) {
+                        // handle case where genres were selected but no book ID was returned
                         console.error('[CREATE] No book_id returned from book creation!');
                         showMessage('Warning: Book created but could not add genres - no book ID returned', 'error');
                     }
                     
+                    // show success message to user
                     showMessage('Book created successfully' + (formData.genres && formData.genres.length > 0 ? ' with genres' : ''), 'success');
-                    document.getElementById('addBookForm').reset();
-                    loadBooks();
+                    
+                    // clear the add book form to prepare for next entry
+                    document.getElementById('addBookForm').reset(); // clear form
+                    
+                    // refresh the book list to show the new book
+                    loadBooks(); // refresh data
                 } else {
+                    // handle server-side validation errors or other issues
                     console.error('[CREATE] Error creating book:', bookResult.error);
                     showMessage(bookResult.error || 'Error creating book', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[CREATE] Error creating book:', error);
                 showMessage('Error creating book: ' + error.message, 'error');
             }
         }
 
+        // Citation for updateBook:
+        // This function is directly based off of the updateRental function in rentals.html, which is all my own work.
+        // AI was used to transform the rentals function into the books function.
+        // Prompt: Take this updateRental function and modify it to fit my books updating. [Paste in updateRental function, Books updating section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // This function differs in the sense that it updates a book instead of a rental.
+        // sends a PUT request to update an existing book
         async function updateBook(bookId, formData) {
             console.log('[UPDATE] updateBook called for ID:', bookId, 'with data:', formData);
             try {
                 console.log('[UPDATE] Sending PUT request to /api/books/' + bookId);
+                
+                // make HTTP PUT request to update the specific book
                 const response = await fetch(`/api/books/${bookId}`, {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // specify we're sending JSON data
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(formData) // convert form data to JSON string
                 });
                 
                 console.log('[UPDATE] Response status:', response.status);
+                
+                // parse the server's response
                 const result = await response.json();
                 console.log('[UPDATE] Response data:', result);
                 
+                // check if the update was successful
                 if (response.ok) {
                     console.log('[UPDATE] Book updated successfully:', result.message);
+                    
+                    // show success message to user
                     showMessage(result.message || 'Book updated successfully', 'success');
+                    
+                    // clear the edit form since update is complete
                     clearEditForm();
-                    loadBooks(); // Reload the table
+                    
+                    // refresh the book list to show updated information
+                    loadBooks(); // refresh data
                 } else {
+                    // handle server-side validation errors or book not found
                     console.error('[UPDATE] Error updating book:', result.error);
                     showMessage(result.error || 'Error updating book', 'error');
                 }
             } catch (error) {
+                // handle network errors or JSON parsing issues
                 console.error('[UPDATE] Error updating book:', error);
                 showMessage('Error updating book: ' + error.message, 'error');
             }
         }
 
+        // Citation for clearEditForm:
+        // AI was used to help me reset the html form.
+        // Prompt used: "How do I reset an HTML form in the same file's javascript <script>?""
+        // AI Source URL: https://claude.ai
+        // Date: 05/2025
+        // clears all fields in the edit form by resetting it
         function clearEditForm() {
             console.log('[EDIT] Clearing edit form');
             document.getElementById('editBookForm').reset();
         }
 
+        // Citation for addBookForm event listener:
+        // This event listener is directly based off of the createRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the books event listener.
+        // Prompt: Take this createRentalForm event listener and modify it to fit my books form. [Paste in createRentalForm event listener, Books form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // Additional AI help was used for updating relationship table when books are created.
+        // event listener for add book form submission
         document.getElementById('addBookForm').addEventListener('submit', function(e) {
-            //Claude AI again for updating relationship table
             console.log('[FORM] Add book form submitted');
-            e.preventDefault();
             
+            // prevent the browser's default form submission behavior (page reload)
+            e.preventDefault(); // prevent default form behavior (page reload)
+            
+            // extract data from the form using FormData API
             const formData = new FormData(this);
             const genreSelect = document.getElementById('genres');
             
-            // Extract selected genres correctly
+            // extract selected genres correctly from the multi-select dropdown
             const selectedGenres = Array.from(genreSelect.selectedOptions).map(option => option.value);
             console.log('[FORM] Selected genres:', selectedGenres);
             
+            // build a clean JavaScript object with the form data
+            // get values from named form fields and parse integers where needed
             const bookData = {
-                title: formData.get('title'),
-                author_id: parseInt(formData.get('author_id')),
-                publication_date: formData.get('publication_date'),
-                description: formData.get('description') || null,
-                total_qty: parseInt(formData.get('total_qty')),
-                genres: selectedGenres  // This should now work correctly
+                title: formData.get('title'), // get the title input value
+                author_id: parseInt(formData.get('author_id')), // parse author ID as integer
+                publication_date: formData.get('publication_date'), // get publication date
+                description: formData.get('description') || null, // get description, null if empty
+                total_qty: parseInt(formData.get('total_qty')), // parse quantity as integer
+                genres: selectedGenres  // include selected genres array
             };
             
             console.log('[FORM] Final book data:', bookData);
+            
+            // call the createBook function with the collected data
             createBook(bookData);
         });
 
+        // Citation for editBookForm event listener:
+        // This event listener is directly based off of the editRentalForm event listener in rentals.html, which is all my own work except for:
+            // AI tools were used with the prompts, "How do I retrieve a specific element from html formdata in javascript" -> resulting in formData.get,
+            // and finally claude suggested to include e.preventDefault to prevent default form behavior.
+        // AI was used to transform the rentals event listener into the books event listener.
+        // Prompt: Take this editRentalForm event listener and modify it to fit my books form. [Paste in editRentalForm event listener, Books form section]
+        // Date: 05/2025
+        // AI Source URL: https://claude.ai
+        // event listener for edit book form submission
         document.getElementById('editBookForm').addEventListener('submit', function(e) {
             console.log('[FORM] Edit book form submitted');
+            
+            // prevent default browser form submission behavior
             e.preventDefault();
             
+            // extract data from the edit form
             const formData = new FormData(this);
             const bookId = formData.get('book_id');
             
             console.log('[FORM] Selected book ID for edit:', bookId);
             
+            // validate that a book has been selected for editing
             if (!bookId) {
                 console.error('[FORM] No book selected for edit');
                 showMessage('Please select a book to edit', 'error');
                 return;
             }
             
+            // extract all form data and prepare the payload for update
             const bookData = {
-                title: formData.get('title'),
-                author_id: parseInt(formData.get('author_id')),
-                publication_date: formData.get('publication_date'),
-                description: formData.get('description') || null,
-                total_qty: parseInt(formData.get('total_qty'))
+                title: formData.get('title'), // get the updated title
+                author_id: parseInt(formData.get('author_id')), // parse updated author ID
+                publication_date: formData.get('publication_date'), // get updated publication date
+                description: formData.get('description') || null, // get updated description, null if empty
+                total_qty: parseInt(formData.get('total_qty')) // parse updated quantity
             };
             
             console.log('[FORM] Parsed edit book data:', bookData);
+            
+            // call the updateBook function with the ID and data
             updateBook(bookId, bookData);
         });
 
-        // Initialize page by loading all data
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('[INIT] Page loaded, ready to load data');
-            
-            // Load all data in sequence to ensure dropdowns are populated before books
-            try {
-                await loadAuthors();
-                await loadGenres();
-                await loadBooks();
-                console.log('[INIT] All data loaded successfully');
-            } catch (error) {
-                console.error('[INIT] Error during initialization:', error);
-                showMessage('Error initializing page: ' + error.message, 'error');
-            }
+        // Citation for DOMContentLoaded Event listener:
+        // This is directly based off of the DOMContentLoaded event listener in rentals.html, which was based on MDN Web Docs - "DOMContentLoaded" event usage pattern
+        // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
+        // when the page finishes loading, trigger book data loading
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[INIT] Page loaded, ready to load books');
+            loadBooks();
         });
     </script>
 

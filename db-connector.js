@@ -1,3 +1,7 @@
+//Citation for db.connector.js:
+// This file is entirely based on db-connect.js from activity 2: Connect webapp to database (individual)
+// CS 340 Oregon Statue University
+
 // Get an instance of mysql we can use in the app
 let mysql = require('mysql2')
 
