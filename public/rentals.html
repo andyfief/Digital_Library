@@ -128,9 +128,7 @@
                 <label for="user">User:</label>
                 <select id="user" name="user_id" required>
                     <option value="">Select User</option>
-                    <option value="1">fiefa</option>
-                    <option value="2">arorae</option>
-                    <option value="3">bookLuvr2004</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -139,9 +137,7 @@
                 <label for="book">Book:</label>
                 <select id="book" name="book_id" required>
                     <option value="">Select Book</option>
-                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">Animal Farm</option>
-                    <option value="3">The Lightning Thief</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -179,9 +175,7 @@
                 <label for="edit_user">User:</label>
                 <select id="edit_user" name="user_id" required>
                     <option value="">Select User</option>
-                    <option value="1">fiefa</option>
-                    <option value="2">arorae</option>
-                    <option value="3">bookLuvr2004</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -190,9 +184,7 @@
                 <label for="edit_book">Book:</label>
                 <select id="edit_book" name="book_id" required>
                     <option value="">Select Book</option>
-                    <option value="1">Harry Potter and the Sorcerer's Stone</option>
-                    <option value="2">Animal Farm</option>
-                    <option value="3">The Lightning Thief</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -220,8 +212,8 @@
             <thead>
                 <tr>
                     <th>Rental ID</th>
-                    <th>User ID</th>
-                    <th>Book ID</th>
+                    <th>User</th>
+                    <th>Book</th>
                     <th>Rental Date</th>
                     <th>Expiration Date</th>
                     <th>Actions</th>
@@ -245,6 +237,16 @@
 
     // global array to store rentals, avoids needing to refetch from the API multiple times
     let allRentals = [];
+    
+    // Citation for allUsers and allBooks storage arrays:
+    // These global storage arrays are directly based off of similar arrays in the second file (paste.txt).
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // global arrays to store users and books for dropdown population
+    let allUsers = [];
+    let allBooks = [];
 
    // Citation for showMessage:
    // This function is all my own work.
@@ -256,6 +258,94 @@
             // clears the message after 5 seconds
             messageDiv.innerHTML = '';
         }, 5000);
+    }
+
+    // Citation for loadUsers:
+    // This function is directly based off of the loadUsers function in the second file (paste.txt).
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // fetches user data from the server and populates user dropdowns
+    async function loadUsers() {
+        console.log('[LOAD] loadUsers() called');
+        try {
+            console.log('[LOAD] Fetching from /api/users...');
+            const response = await fetch('/api/users');
+            console.log('[LOAD] Users response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the HTML response and extract JSON
+            const htmlResponse = await response.text();
+            const jsonMatch = htmlResponse.match(/\[.*\]/);
+            
+            if (!jsonMatch) {
+                throw new Error('No JSON data found in users response');
+            }
+            
+            const jsonString = jsonMatch[0];
+            const users = JSON.parse(jsonString);
+            console.log('[LOAD] Parsed users data:', users);
+            
+            // Store users globally
+            allUsers = users;
+            
+            // Populate user dropdowns
+            populateUserDropdowns(users);
+            
+            console.log(`[LOAD] Successfully loaded ${users.length} users`);
+            
+        } catch (error) {
+            console.error('[LOAD] Error in loadUsers:', error);
+            showMessage('Error loading users: ' + error.message, 'error');
+        }
+    }
+
+    // Citation for loadBooks:
+    // This function is directly based off of the loadBooks function in the second file (paste.txt).
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // fetches book data from the server and populates book dropdowns
+    async function loadBooks() {
+        console.log('[LOAD] loadBooks() called');
+        try {
+            console.log('[LOAD] Fetching from /api/books...');
+            const response = await fetch('/api/books');
+            console.log('[LOAD] Books response status:', response.status);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the HTML response and extract JSON
+            const htmlResponse = await response.text();
+            const jsonMatch = htmlResponse.match(/\[.*\]/);
+            
+            if (!jsonMatch) {
+                throw new Error('No JSON data found in books response');
+            }
+            
+            const jsonString = jsonMatch[0];
+            const books = JSON.parse(jsonString);
+            console.log('[LOAD] Parsed books data:', books);
+            
+            // Store books globally
+            allBooks = books;
+            
+            // Populate book dropdowns
+            populateBookDropdowns(books);
+            
+            console.log(`[LOAD] Successfully loaded ${books.length} books`);
+            
+        } catch (error) {
+            console.error('[LOAD] Error in loadBooks:', error);
+            showMessage('Error loading books: ' + error.message, 'error');
+        }
     }
 
      //Citation for loadRentals:
@@ -302,10 +392,79 @@
         }
     }
 
+    // Citation for populateUserDropdowns:
+    // This function is directly based off of the populateUserDropdowns function in the second file (paste.txt).
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // populates both create and edit form user dropdowns with fetched user data
+    function populateUserDropdowns(users) {
+        console.log('[DROPDOWN] Populating user dropdowns with', users.length, 'users');
+        
+        // Get all user select elements
+        const userSelects = ['user', 'edit_user'];
+        
+        userSelects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (!select) {
+                console.error(`[DROPDOWN] Could not find ${selectId} select`);
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select User</option>';
+            
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.user_id;
+                option.textContent = user.username;
+                select.appendChild(option);
+            });
+        });
+        
+        console.log('[DROPDOWN] Successfully populated user dropdowns');
+    }
+
+    // Citation for populateBookDropdowns:
+    // This function is directly based off of the populateBookDropdowns function in the second file (paste.txt).
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // populates both create and edit form book dropdowns with fetched book data
+    function populateBookDropdowns(books) {
+        console.log('[DROPDOWN] Populating book dropdowns with', books.length, 'books');
+        
+        // Get all book select elements
+        const bookSelects = ['book', 'edit_book'];
+        
+        bookSelects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (!select) {
+                console.error(`[DROPDOWN] Could not find ${selectId} select`);
+                return;
+            }
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">Select Book</option>';
+            
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.book_id;
+                option.textContent = book.title;
+                select.appendChild(option);
+            });
+        });
+        
+        console.log('[DROPDOWN] Successfully populated book dropdowns');
+    }
+
      // Citation for populateRentalsTable:
      // This function is all my own work, with the exception of an AI tool used to help parse the date with 'T'
      // Help me parse the date out of this rental.date object: (paste rental.date after logging)
      // AI Source URL: https://claude.ai
+     // Additional enhancement was added from the second file to display user names and book titles instead of IDs in the table.
     // populates the rental table with data passed to it
     function populateRentalsTable(rentals) {
         const tbody = document.getElementById('rentalsTableBody');
@@ -328,16 +487,29 @@
 
         // loop through each rental and build a row in the table
         rentals.forEach((rental, index) => {
+            // Citation for user and book name display enhancement:
+            // This enhancement is directly based off of the populateRentalsTable function in the second file (paste.txt).
+            // AI was used to transform the second file functionality into the main rentals.html file.
+            // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+            // Date: 06/2025
+            // AI Source URL: https://claude.ai
+            // Find user and book names from the arrays instead of displaying IDs
+            const user = allUsers.find(u => u.user_id == rental.user_id);
+            const book = allBooks.find(b => b.book_id == rental.book_id);
+            
+            const userName = user ? user.username : `User ID: ${rental.user_id}`;
+            const bookTitle = book ? book.title : `Book ID: ${rental.book_id}`;
+            
             const row = document.createElement('tr');
 
             // rental.date might include time, so we split at 'T' and take the date part
             // if rental.date doesn't exist, we fall back to 'N/A'
             row.innerHTML = `
                 <td>${rental.rental_id || 'N/A'}</td>
-                <td>${rental.user_id || 'N/A'}</td>
-                <td>${rental.book_id || 'N/A'}</td>
-                <td>${rental.date ? rental.date.split('T')[0] : '' || 'N/A'}</td>
-                <td>${rental.date ? rental.date.split('T')[0] : '' || 'N/A'}</td>
+                <td>${userName}</td>
+                <td>${bookTitle}</td>
+                <td>${rental.date ? rental.date.split('T')[0] : 'N/A'}</td>
+                <td>${rental.expiration_date ? rental.expiration_date.split('T')[0] : 'N/A'}</td>
                 <td class="actions">
                     <button class="delete-btn" onclick="deleteRental(${rental.rental_id})">Delete</button>
                 </td>
@@ -348,6 +520,7 @@
 
     //Citation for populateEditDropdown:
     // This function is all my own work.
+    // Additional enhancement was added from the second file to display user names and book titles in dropdown options.
     // fills a dropdown in the edit form with available rentals
     function populateEditDropdown(rentals) {
         const select = document.getElementById('edit_rental_id');
@@ -358,9 +531,22 @@
 
         // add each rental as an option in the dropdown
         rentals.forEach(rental => {
+            // Citation for enhanced dropdown display with user and book names:
+            // This enhancement is directly based off of the populateEditDropdown function in the second file (paste.txt).
+            // AI was used to transform the second file functionality into the main rentals.html file.
+            // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+            // Date: 06/2025
+            // AI Source URL: https://claude.ai
+            // Find user and book names for better display
+            const user = allUsers.find(u => u.user_id == rental.user_id);
+            const book = allBooks.find(b => b.book_id == rental.book_id);
+            
+            const userName = user ? user.username : `User ${rental.user_id}`;
+            const bookTitle = book ? book.title : `Book ${rental.book_id}`;
+            
             const option = document.createElement('option');
             option.value = rental.rental_id;
-            option.textContent = `${rental.rental_id} - User ${rental.user_id} (Book ${rental.book_id})`;
+            option.textContent = `Rental ${rental.rental_id} - ${userName} (${bookTitle})`;
             select.appendChild(option);
         });
     }
@@ -533,12 +719,28 @@
         updateRental(rentalId, rentalData);
     });
 
-    // Citation for DOMContentLoaded Event listener:
+    // Citation for enhanced DOMContentLoaded Event listener:
     // Based on MDN Web Docs - "DOMContentLoaded" event usage pattern
     // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
-    // when the page finishes loading, trigger rental data loading
-    document.addEventListener('DOMContentLoaded', function() {
-        loadRentals();
+    // Additional functionality was added from the second file (paste.txt) to load users and books before rentals.
+    // AI was used to transform the second file functionality into the main rentals.html file.
+    // Prompt: Add the dynamic dropdown functionality from the second file to the main rentals.html file.
+    // Date: 06/2025
+    // AI Source URL: https://claude.ai
+    // when the page finishes loading, trigger sequential data loading for proper dropdown population
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('[INIT] Page loaded, ready to load data');
+        
+        // Load all data in sequence to ensure dropdowns are populated before rentals
+        try {
+            await loadUsers();
+            await loadBooks();
+            await loadRentals();
+            console.log('[INIT] All data loaded successfully');
+        } catch (error) {
+            console.error('[INIT] Error during initialization:', error);
+            showMessage('Error initializing page: ' + error.message, 'error');
+        }
     });
 </script>
     <footer>
