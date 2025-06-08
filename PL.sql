@@ -1,9 +1,13 @@
 -- Andrew Fief
--------------CITATIONS---------------------------
--- I used Claude AI to assist in writing the error handling at the beginning of the procedure. 
 
 DELIMITER //
 
+-- Citation for delete_rental procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]." I also had it help with checking that a rental exists before proceeding,
+-- Prompt "How can I check that an entry exists in SQL before acting on it?" Resulting in SELECT COUNT(*), which is also used repeatedly in the rest of this file.
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 DROP PROCEDURE IF EXISTS delete_rental//
 
 CREATE PROCEDURE delete_rental(IN p_rental_id INT)
@@ -28,7 +32,11 @@ BEGIN
     
 END//
 
-
+-- Citation for add_rental procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]."
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 DROP PROCEDURE IF EXISTS add_rental//
 
 CREATE PROCEDURE add_rental(
@@ -70,7 +78,11 @@ BEGIN
     
 END//
 
-
+-- Citation for update_rental procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]."
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 DROP PROCEDURE IF EXISTS update_rental//
 
 CREATE PROCEDURE update_rental(
@@ -121,7 +133,13 @@ BEGIN
     
 END//
 
-
+-- Citation for delete_book procedure:
+-- This procedure is directly based off of the delete_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the book procedure.
+-- Prompt: Take this delete_rental procedure and modify it to work for deleting books instead. [Paste in delete_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it deletes a book instead of a rental.
 DROP PROCEDURE IF EXISTS delete_book//
 
 CREATE PROCEDURE delete_book(IN p_book_id INT)
@@ -146,7 +164,13 @@ BEGIN
     
 END//
 
-
+-- Citation for add_book procedure:
+-- This procedure is directly based off of the add_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the book procedure.
+-- Prompt: Take this add_rental procedure and modify it to work for adding books instead. [Paste in add_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it creates a book instead of a rental, and includes additional fields like title, description, and quantity.
 DROP PROCEDURE IF EXISTS add_book//
 
 CREATE PROCEDURE add_book(
@@ -195,7 +219,13 @@ BEGIN
     
 END//
 
-
+-- Citation for update_book procedure:
+-- This procedure is directly based off of the update_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the book procedure.
+-- Prompt: Take this update_rental procedure and modify it to work for updating books instead. [Paste in update_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it updates a book instead of a rental, and includes additional fields like title, description, and quantity.
 DROP PROCEDURE IF EXISTS update_book//
 
 CREATE PROCEDURE update_book(
@@ -240,8 +270,13 @@ BEGIN
     
 END//
 
-
-
+-- Citation for delete_author procedure:
+-- This procedure is directly based off of the delete_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the author procedure.
+-- Prompt: Take this delete_rental procedure and modify it to work for deleting authors instead. [Paste in delete_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it deletes an author instead of a rental.
 DROP PROCEDURE IF EXISTS delete_author//
 
 CREATE PROCEDURE delete_author(IN p_author_id INT)
@@ -266,6 +301,13 @@ BEGIN
     
 END//
 
+-- Citation for add_author procedure:
+-- This procedure is directly based off of the add_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the author procedure.
+-- Prompt: Take this add_rental procedure and modify it to work for adding authors instead. [Paste in add_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it creates an author instead of a rental, with simplified fields for name and bio.
 DROP PROCEDURE IF EXISTS add_author//
 
 CREATE PROCEDURE add_author(
@@ -287,6 +329,13 @@ BEGIN
     
 END//
 
+-- Citation for update_author procedure:
+-- This procedure is directly based off of the update_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the author procedure.
+-- Prompt: Take this update_rental procedure and modify it to work for updating authors instead. [Paste in update_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it updates an author instead of a rental, with simplified fields for name and bio.
 DROP PROCEDURE IF EXISTS update_author//
 
 CREATE PROCEDURE update_author(
@@ -317,6 +366,11 @@ BEGIN
     
 END//
 
+-- Citation for delete_relationship procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]."
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 DROP PROCEDURE IF EXISTS delete_relationship//
 
 CREATE PROCEDURE delete_relationship(IN p_relationship_id INT)
@@ -340,6 +394,12 @@ BEGIN
     END IF;
     
 END//
+
+-- Citation for add_relationship procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]."
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 
 DROP PROCEDURE IF EXISTS add_relationship//
 
@@ -404,6 +464,11 @@ BEGIN
     
 END//
 
+-- Citation for update_relationship procedure:
+-- This procedure is all my own work, except for I had AI add error debugging as a failsafe.
+-- Prompt: "Add error messages to this stored procedure [paste stored procedure]."
+-- Date: 05/2025
+-- AI Source URL: claude.ai
 DROP PROCEDURE IF EXISTS update_relationship//
 
 CREATE PROCEDURE update_relationship(
@@ -458,7 +523,13 @@ BEGIN
     
 END//
 
--- DELETE user using stored procedure
+-- Citation for delete_user procedure:
+-- This procedure is directly based off of the delete_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the user procedure.
+-- Prompt: Take this delete_rental procedure and modify it to work for deleting users instead. [Paste in delete_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it deletes a user instead of a rental.
 DROP PROCEDURE IF EXISTS delete_user//
 
 CREATE PROCEDURE delete_user(IN p_user_id INT)
@@ -483,7 +554,13 @@ BEGIN
     
 END//
 
--- ADD user using stored procedure
+-- Citation for add_user procedure:
+-- This procedure is directly based off of the add_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the user procedure.
+-- Prompt: Take this add_rental procedure and modify it to work for adding users instead. [Paste in add_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it creates a user instead of a rental, with fields for username, password, and email, including unique constraint checking.
 DROP PROCEDURE IF EXISTS add_user//
 
 CREATE PROCEDURE add_user(
@@ -524,7 +601,13 @@ BEGIN
     
 END//
 
--- UPDATE user using stored procedure
+-- Citation for update_user procedure:
+-- This procedure is directly based off of the update_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the user procedure.
+-- Prompt: Take this update_rental procedure and modify it to work for updating users instead. [Paste in update_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it updates a user instead of a rental, with fields for username, password, and email, including unique constraint checking.
 DROP PROCEDURE IF EXISTS update_user//
 
 CREATE PROCEDURE update_user(
@@ -581,7 +664,13 @@ BEGIN
     
 END//
 
--- DELETE genre using stored procedure
+-- Citation for delete_genre procedure:
+-- This procedure is directly based off of the delete_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the genre procedure.
+-- Prompt: Take this delete_rental procedure and modify it to work for deleting genres instead. [Paste in delete_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it deletes a genre instead of a rental.
 DROP PROCEDURE IF EXISTS delete_genre//
 
 CREATE PROCEDURE delete_genre(IN p_genre_id INT)
@@ -606,7 +695,13 @@ BEGIN
     
 END//
 
--- ADD genre using stored procedure
+-- Citation for add_genre procedure:
+-- This procedure is directly based off of the add_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the genre procedure.
+-- Prompt: Take this add_rental procedure and modify it to work for adding genres instead. [Paste in add_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it creates a genre instead of a rental, with a single title field and unique constraint checking.
 DROP PROCEDURE IF EXISTS add_genre//
 
 CREATE PROCEDURE add_genre(
@@ -637,7 +732,13 @@ BEGIN
     
 END//
 
--- UPDATE genre using stored procedure
+-- Citation for update_genre procedure:
+-- This procedure is directly based off of the update_rental procedure, which is all my own work.
+-- AI was used to transform the rental procedure into the genre procedure.
+-- Prompt: Take this update_rental procedure and modify it to work for updating genres instead. [Paste in update_rental procedure, DDL file section]
+-- Date: 06/2025
+-- AI Source URL: https://claude.ai
+-- This procedure differs in the sense that it updates a genre instead of a rental, with a single title field and unique constraint checking.
 DROP PROCEDURE IF EXISTS update_genre//
 
 CREATE PROCEDURE update_genre(

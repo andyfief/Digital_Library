@@ -2,6 +2,14 @@ DROP PROCEDURE IF EXISTS reset_database;
 
 DELIMITER $$
 
+
+-- Citation for DDL.sql and reset_datebase procedure:
+-- The entirety of this file is all my own work, except for debugging why // as a delimiter wasn't working on my MariaDB connection.
+-- AI Prompt: "Im getting this error, [paste entire error], what does it mean?"
+-- Result: The issue is in your delimiter. MariaDB can be finicky with delimiter selection; try $$ instead.
+-- AI source URL: https://claude.ai
+-- Date: 04/2025
+
 Create PROCEDURE reset_database()
 BEGIN
 
