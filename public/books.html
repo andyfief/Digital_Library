@@ -145,9 +145,7 @@
                 <label for="author">Author:</label>
                 <select id="author" name="author_id" required>
                     <option value="">Select Author</option>
-                    <option value="1">J.K. Rowling</option>
-                    <option value="2">George Orwell</option>
-                    <option value="3">Rick Riordan</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -173,9 +171,7 @@
             <div>
                 <label for="genres">Genres:</label>
                 <select id="genres" name="genres" multiple>
-                    <option value="1">Fantasy</option>
-                    <option value="2">Dystopian</option>
-                    <option value="3">Young Adult</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
                 <small>Hold Ctrl (Windows) or Cmd (Mac) to select multiple genres</small>
             </div>
@@ -208,9 +204,7 @@
                 <label for="edit_author">Author:</label>
                 <select id="edit_author" name="author_id" required>
                     <option value="">Select Author</option>
-                    <option value="1">J.K. Rowling</option>
-                    <option value="2">George Orwell</option>
-                    <option value="3">Rick Riordan</option>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
             </div>
             
@@ -234,12 +228,7 @@
             
             <!-- Genres for editing -->
             <div>
-                <label for="edit_genres">Genres:</label>
-                <select id="edit_genres" name="genres" multiple>
-                    <option value="1">Fantasy</option>
-                    <option value="2">Dystopian</option>
-                    <option value="3">Young Adult</option>
-                </select>
+                <p>Please edit a book's genres on the Book Genres page.</p>
             </div>
             
             <button type="submit">Update Book</button>
@@ -283,6 +272,16 @@
         
         // global array to store books, avoids needing to refetch from the API multiple times
         let allBooks = [];
+        
+        // Citation for allAuthors and allGenres storage arrays:
+        // These global storage arrays are directly based off of similar arrays in the second file (paste.txt).
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // global arrays to store authors and genres for dropdown population
+        let allAuthors = [];
+        let allGenres = [];
 
         // Citation for showMessage:
         // This function is directly based off of the showMessage function in rentals.html, which is all my own work.
@@ -307,6 +306,94 @@
                 // clears the message after 5 seconds to avoid cluttering the UI
                 messageDiv.innerHTML = '';
             }, 5000);
+        }
+
+        // Citation for loadAuthors:
+        // This function is directly based off of the loadAuthors function in the second file (paste.txt).
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // fetches author data from the server and populates author dropdowns
+        async function loadAuthors() {
+            console.log('[LOAD] loadAuthors() called');
+            try {
+                console.log('[LOAD] Fetching from /api/authors...');
+                const response = await fetch('/api/authors');
+                console.log('[LOAD] Authors response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the HTML response and extract JSON
+                const htmlResponse = await response.text();
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in authors response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                const authors = JSON.parse(jsonString);
+                console.log('[LOAD] Parsed authors data:', authors);
+                
+                // Store authors globally
+                allAuthors = authors;
+                
+                // Populate author dropdowns
+                populateAuthorDropdowns(authors);
+                
+                console.log(`[LOAD] Successfully loaded ${authors.length} authors`);
+                
+            } catch (error) {
+                console.error('[LOAD] Error in loadAuthors:', error);
+                showMessage('Error loading authors: ' + error.message, 'error');
+            }
+        }
+
+        // Citation for loadGenres:
+        // This function is directly based off of the loadGenres function in the second file (paste.txt).
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // fetches genre data from the server and populates genre dropdowns
+        async function loadGenres() {
+            console.log('[LOAD] loadGenres() called');
+            try {
+                console.log('[LOAD] Fetching from /api/genres...');
+                const response = await fetch('/api/genres');
+                console.log('[LOAD] Genres response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Get the HTML response and extract JSON
+                const htmlResponse = await response.text();
+                const jsonMatch = htmlResponse.match(/\[.*\]/);
+                
+                if (!jsonMatch) {
+                    throw new Error('No JSON data found in genres response');
+                }
+                
+                const jsonString = jsonMatch[0];
+                const genres = JSON.parse(jsonString);
+                console.log('[LOAD] Parsed genres data:', genres);
+                
+                // Store genres globally
+                allGenres = genres;
+                
+                // Populate genre dropdowns
+                populateGenreDropdowns(genres);
+                
+                console.log(`[LOAD] Successfully loaded ${genres.length} genres`);
+                
+            } catch (error) {
+                console.error('[LOAD] Error in loadGenres:', error);
+                showMessage('Error loading genres: ' + error.message, 'error');
+            }
         }
 
         // Citation for loadBooks:
@@ -365,12 +452,81 @@
             }
         }
 
+        // Citation for populateAuthorDropdowns:
+        // This function is directly based off of the populateAuthorDropdowns function in the second file (paste.txt).
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // populates both add and edit form author dropdowns with fetched author data
+        function populateAuthorDropdowns(authors) {
+            console.log('[DROPDOWN] Populating author dropdowns with', authors.length, 'authors');
+            
+            // Get all author select elements
+            const authorSelects = ['author', 'edit_author'];
+            
+            authorSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select) {
+                    console.error(`[DROPDOWN] Could not find ${selectId} select`);
+                    return;
+                }
+                
+                // Clear existing options except the first one
+                select.innerHTML = '<option value="">Select Author</option>';
+                
+                authors.forEach(author => {
+                    const option = document.createElement('option');
+                    option.value = author.author_id;
+                    option.textContent = author.name;
+                    select.appendChild(option);
+                });
+            });
+            
+            console.log('[DROPDOWN] Successfully populated author dropdowns');
+        }
+
+        // Citation for populateGenreDropdowns:
+        // This function is directly based off of the populateGenreDropdowns function in the second file (paste.txt).
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // populates both add and edit form genre dropdowns with fetched genre data
+        function populateGenreDropdowns(genres) {
+            console.log('[DROPDOWN] Populating genre dropdowns with', genres.length, 'genres');
+            
+            // Get all genre select elements
+            const genreSelects = ['genres'];
+            
+            genreSelects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (!select) {
+                    console.error(`[DROPDOWN] Could not find ${selectId} select`);
+                    return;
+                }
+                
+                // Clear existing options
+                select.innerHTML = '';
+                
+                genres.forEach(genre => {
+                    const option = document.createElement('option');
+                    option.value = genre.genre_id;
+                    option.textContent = genre.title;
+                    select.appendChild(option);
+                });
+            });
+            
+            console.log('[DROPDOWN] Successfully populated genre dropdowns');
+        }
+
         // Citation for populateBooksTable:
         // This function is directly based off of the populateRentalsTable function in rentals.html, which is all my own work.
         // AI was used to transform the rentals function into the books function.
         // Prompt: Take this populateRentalsTable function and modify it to fit my books table. [Paste in populateRentalsTable, Books ddl section]
         // Date: 05/2025
         // AI Source URL: https://claude.ai
+        // Additional enhancement was added from the second file to display author names instead of IDs in the table.
         // This function differs in the sense that it populates a book table instead of rental table, with different column data.
         // populates the book table with data passed to it
         function populateBooksTable(books) {
@@ -402,6 +558,16 @@
             books.forEach((book, index) => {
                 console.log(`[TABLE] Processing book ${index + 1}:`, book);
                 
+                // Citation for author name display enhancement:
+                // This enhancement is directly based off of the populateBooksTable function in the second file (paste.txt).
+                // AI was used to transform the second file functionality into the main books.html file.
+                // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+                // Date: 06/2025
+                // AI Source URL: https://claude.ai
+                // Find author name from the authors array instead of displaying author ID
+                const author = allAuthors.find(a => a.author_id == book.author_id);
+                const authorName = author ? author.name : `Author ID: ${book.author_id}`;
+                
                 // create a new table row element
                 const row = document.createElement('tr');
                 
@@ -410,8 +576,8 @@
                 row.innerHTML = `
                     <td>${book.book_id || 'N/A'}</td>
                     <td>${book.title || 'N/A'}</td>
-                    <td>${book.author_id || 'N/A'}</td>
-                    <td>${book.publication_date ? book.publication_date.split('T')[0] : 'N/A'}</td>
+                    <td>${authorName}</td>
+                    <td>${book.publication_date || 'N/A'}</td>
                     <td>${book.total_qty || 'N/A'}</td>
                     <td>${book.description || 'N/A'}</td>
                     <td class="actions">
@@ -806,13 +972,28 @@
             updateBook(bookId, bookData);
         });
 
-        // Citation for DOMContentLoaded Event listener:
+        // Citation for enhanced DOMContentLoaded Event listener:
         // This is directly based off of the DOMContentLoaded event listener in rentals.html, which was based on MDN Web Docs - "DOMContentLoaded" event usage pattern
         // https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event
-        // when the page finishes loading, trigger book data loading
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('[INIT] Page loaded, ready to load books');
-            loadBooks();
+        // Additional functionality was added from the second file (paste.txt) to load authors and genres before books.
+        // AI was used to transform the second file functionality into the main books.html file.
+        // Prompt: Add the dynamic dropdown functionality from the second file to the main books.html file.
+        // Date: 06/2025
+        // AI Source URL: https://claude.ai
+        // when the page finishes loading, trigger sequential data loading for proper dropdown population
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('[INIT] Page loaded, ready to load data');
+            
+            // Load all data in sequence to ensure dropdowns are populated before books
+            try {
+                await loadAuthors();
+                await loadGenres();
+                await loadBooks();
+                console.log('[INIT] All data loaded successfully');
+            } catch (error) {
+                console.error('[INIT] Error during initialization:', error);
+                showMessage('Error initializing page: ' + error.message, 'error');
+            }
         });
     </script>
 
