@@ -1,4 +1,4 @@
-# Digital Library - A SQL Database Project
+# Digital Library - A SQL Database Project associated with Oregon State University
 
 **A collaborative web application for managing digital library content including books, authors, and genres, built with Node.js and MariaDB**
 
@@ -13,11 +13,11 @@ The MariaDB database was hosted by Oregon State University and accessed through 
 ## Key Features
 
 ### Entity Relationship Diagram
-![Screenshot](./images/screenshot.png)
+![Screenshot](./Schema.png)
 
 ### Database Schema
 The database follows a fully normalized Third Normal Form design:
-![Screenshot](./images/screenshot.png)
+![Screenshot](./ER_Diagram.png)
 
 ### Database Design & Architecture
 - **Third Normal Form (3NF) Schema**: Fully normalized relational database design eliminates redundancy and ensures data integrity
