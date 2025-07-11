@@ -40,35 +40,86 @@ The database follows a fully normalized Third Normal Form design:
 ## Technical Implementation
 
 ### Stored Procedures
+All data manipulation operations utilize stored procedures with comprehensive error handling:
+- Input validation and existence checks
+- Comprehensive error messages
+- Transaction support where appropriate (books, relationships)
+- Rollback capabilities for data integrity
+- Unique constraint validation (users, genres, relationships)
 
-All data manipulation operations utilize stored procedures:
+#### Rental Management
+- `add_rental(user_id, book_id, date, expiration_date)` - Create new rental with validation
+- `update_rental(rental_id, user_id, book_id, date, expiration_date)` - Update existing rental
+- `delete_rental(rental_id)` - Delete rental with existence check
 
-- **Book Management**: `CreateBook`, `UpdateBook`, `DeleteBook`
-- **Author Management**: `CreateAuthor`, `UpdateAuthor`, `DeleteAuthor`
-- **Genre Management**: `CreateGenre`, `UpdateGenre`, `DeleteGenre`
-- **Relationship Management**: `CreateRelationship`, `UpdateRelationship`, `DeleteRelationship`
+#### Book Management  
+- `add_book(title, author_id, publication_date, description, total_qty)` - Create new book with transaction support
+- `update_book(book_id, title, author_id, publication_date, description, total_qty)` - Update existing book
+- `delete_book(book_id)` - Delete book with existence check
+
+#### Author Management
+- `add_author(name, bio)` - Create new author
+- `update_author(author_id, name, bio)` - Update existing author  
+- `delete_author(author_id)` - Delete author with existence check
+
+#### Genre Management
+- `add_genre(title)` - Create new genre with uniqueness validation
+- `update_genre(genre_id, title)` - Update existing genre with uniqueness check
+- `delete_genre(genre_id)` - Delete genre with existence check
+
+#### User Management
+- `add_user(username, password, email)` - Create new user with unique username/email validation
+- `update_user(user_id, username, password, email)` - Update user with uniqueness checks
+- `delete_user(user_id)` - Delete user with existence check
+
+#### Relationship Management (Book-Genre Junction)
+- `add_relationship(genre_id, book_id)` - Create book-genre relationship with duplicate prevention
+- `update_relationship(relationship_id, genre_id, book_id)` - Update relationship with validation
+- `delete_relationship(relationship_id)` - Delete relationship with existence check
 
 ## API Endpoints
 
 ### Books
-- `GET /api/books` - Retrieve all books with pagination
-- `GET /api/books/:id` - Get specific book details
+- `GET /api/books` - Retrieve all books
 - `POST /api/books` - Create new book
 - `PUT /api/books/:id` - Update existing book
 - `DELETE /api/books/:id` - Delete book
 
 ### Authors
 - `GET /api/authors` - Retrieve all authors
-- `GET /api/authors/:id` - Get specific author details
 - `POST /api/authors` - Create new author
 - `PUT /api/authors/:id` - Update existing author
 - `DELETE /api/authors/:id` - Delete author
 
 ### Genres
-- `GET /api/genres` - Retrieve all genres
+- `GET /api/genres` - Retrieve all genres (ordered by genre_id)
 - `POST /api/genres` - Create new genre
 - `PUT /api/genres/:id` - Update existing genre
 - `DELETE /api/genres/:id` - Delete genre
+
+### Users
+- `GET /api/users` - Retrieve all users
+- `POST /api/users` - Create new user
+- `PUT /api/users/:id` - Update existing user
+- `DELETE /api/users/:id` - Delete user
+
+### Rentals
+- `GET /api/rentals` - Retrieve all rentals
+- `POST /api/rentals` - Create new rental
+- `PUT /api/rentals/:id` - Update existing rental
+- `DELETE /api/rentals/:id` - Delete rental
+
+### Book-Genre Relationships
+- `GET /api/relationships` - Retrieve all book-genre relationships
+- `POST /api/relationships` - Create new book-genre relationship
+- `PUT /api/relationships/:id` - Update existing relationship
+- `DELETE /api/relationships/:id` - Delete relationship
+
+### Database Management
+- `POST /api/reset` - Reset database to initial state with sample data
+
+### Debug (Development)
+- `GET /api/debug/connection` - Get database connection status and record counts
 
 ## Development Approach
 
